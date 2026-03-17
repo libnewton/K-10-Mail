@@ -1,9 +1,7 @@
 package net.thunderbird.feature.mail.message.list.preferences
 
-import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentSetOf
-import net.thunderbird.core.preference.display.visualSettings.message.list.MessageListDateTimeFormat
 import net.thunderbird.core.preference.display.visualSettings.message.list.UiDensity
 
 /**
@@ -25,7 +23,6 @@ import net.thunderbird.core.preference.display.visualSettings.message.list.UiDen
  * @property actionRequiringUserConfirmation A set of actions that require a confirmation dialog before execution.
  * @property colorizeBackgroundWhenRead Whether to colorize the background of read messages.
  */
-@Immutable
 data class MessageListPreferences(
     val density: UiDensity,
     val groupConversations: Boolean,

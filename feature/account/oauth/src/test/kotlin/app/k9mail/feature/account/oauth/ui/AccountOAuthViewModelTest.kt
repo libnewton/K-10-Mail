@@ -13,31 +13,18 @@ import app.k9mail.feature.account.oauth.ui.AccountOAuthContract.Event
 import app.k9mail.feature.account.oauth.ui.AccountOAuthContract.State
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import net.thunderbird.core.testing.coroutines.MainDispatcherHelper
+import net.thunderbird.core.testing.coroutines.MainDispatcherRule
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class AccountOAuthViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val mainDispatcher = MainDispatcherHelper(UnconfinedTestDispatcher())
-
-    @BeforeTest
-    fun setUp() {
-        mainDispatcher.setUp()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        mainDispatcher.tearDown()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Test
     fun `should change state when google hostname found on initState`() = runMviTest {

@@ -11,10 +11,9 @@ import net.thunderbird.core.logging.testing.TestLogger
 import net.thunderbird.feature.account.AccountId
 import net.thunderbird.feature.account.AccountIdFactory
 import net.thunderbird.feature.mail.message.list.domain.DomainContract
-import net.thunderbird.feature.mail.message.list.domain.model.SortCriteria
-import net.thunderbird.feature.mail.message.list.domain.model.SortType
 import net.thunderbird.feature.mail.message.list.ui.event.MessageListEvent
 import net.thunderbird.feature.mail.message.list.ui.state.MessageListState
+import net.thunderbird.feature.mail.message.list.ui.state.SortType
 import org.junit.Test
 
 class LoadSortTypeStateSideEffectHandlerTest {
@@ -52,12 +51,11 @@ class LoadSortTypeStateSideEffectHandlerTest {
         val logger = TestLogger()
         val accounts = setOf(AccountIdFactory.create())
         val dispatch = spy<suspend (MessageListEvent) -> Unit>(obj = {})
-        val sortCriteriaPerAccount = mapOf(accounts.firstOrNull() to SortCriteria(primary = SortType.DateDesc))
-        val fakeGetSortCriteriaPerAccount =
-            spy<DomainContract.UseCase.GetSortCriteriaPerAccount>(FakeGetSortCriteriaPerAccount(sortCriteriaPerAccount))
+        val sortTypes: Map<AccountId?, SortType> = mapOf(accounts.first() to SortType.DateDesc)
+        val fakeGetSortTypes = spy<DomainContract.UseCase.GetSortTypes>(FakeGetSortTypes(sortTypes))
         val handler = createTestSubject(
             accounts = accounts,
-            getSortCriteriaPerAccount = fakeGetSortCriteriaPerAccount,
+            getSortTypes = fakeGetSortTypes,
             dispatch = dispatch,
         )
 
@@ -66,26 +64,26 @@ class LoadSortTypeStateSideEffectHandlerTest {
 
         // Assert
         verifySuspend {
-            fakeGetSortCriteriaPerAccount.invoke(accounts)
-            dispatch(MessageListEvent.SortCriteriaLoaded(sortCriteriaPerAccount))
+            fakeGetSortTypes.invoke(accounts)
+            dispatch(MessageListEvent.SortTypesLoaded(sortTypes))
         }
     }
 
     private fun createTestSubject(
-        getSortCriteriaPerAccount: DomainContract.UseCase.GetSortCriteriaPerAccount = FakeGetSortCriteriaPerAccount(),
+        getSortTypes: DomainContract.UseCase.GetSortTypes = FakeGetSortTypes(),
         logger: Logger = TestLogger(),
         accounts: Set<AccountId> = setOf(AccountIdFactory.create()),
         dispatch: suspend (MessageListEvent) -> Unit = {},
-    ) = LoadSortCriteriaStateSideEffectHandler(
+    ) = LoadSortTypeStateSideEffectHandler(
         accounts = accounts,
         dispatch = dispatch,
         logger = logger,
-        getSortCriteriaPerAccount = getSortCriteriaPerAccount,
+        getSortTypes = getSortTypes,
     )
 
-    private class FakeGetSortCriteriaPerAccount(
-        private val sortCriteriaPerAccount: Map<AccountId?, SortCriteria> = emptyMap(),
-    ) : DomainContract.UseCase.GetSortCriteriaPerAccount {
-        override suspend fun invoke(accountIds: Set<AccountId>): Map<AccountId?, SortCriteria> = sortCriteriaPerAccount
+    private class FakeGetSortTypes(
+        private val sortTypes: Map<AccountId?, SortType> = emptyMap(),
+    ) : DomainContract.UseCase.GetSortTypes {
+        override suspend fun invoke(accountIds: Set<AccountId>): Map<AccountId?, SortType> = sortTypes
     }
 }

@@ -14,27 +14,14 @@ import app.k9mail.feature.account.setup.ui.options.sync.SyncOptionsContract.Even
 import app.k9mail.feature.account.setup.ui.options.sync.SyncOptionsContract.State
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import net.thunderbird.core.testing.coroutines.MainDispatcherHelper
+import net.thunderbird.core.testing.coroutines.MainDispatcherRule
+import org.junit.Rule
+import org.junit.Test
 
 class SyncOptionsViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val mainDispatcher = MainDispatcherHelper(UnconfinedTestDispatcher())
-
-    @BeforeTest
-    fun setUp() {
-        mainDispatcher.setUp()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        mainDispatcher.tearDown()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     private val testSubject = SyncOptionsViewModel(
         accountStateRepository = InMemoryAccountStateRepository(),

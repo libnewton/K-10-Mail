@@ -119,11 +119,29 @@ object K9 : KoinComponent {
     var messageViewPostMarkAsUnreadNavigation: PostMarkAsUnreadNavigation =
         PostMarkAsUnreadNavigation.ReturnToMessageList
 
+    @JvmStatic
+    var isShowAccountSelector = true
+
     @get:Synchronized
     @set:Synchronized
     @JvmStatic
     var sortType: SortType = AccountDefaultsProvider.DEFAULT_SORT_TYPE
     private val sortAscending = mutableMapOf<SortType, Boolean>()
+
+    @JvmStatic
+    var isMessageViewArchiveActionVisible = false
+
+    @JvmStatic
+    var isMessageViewDeleteActionVisible = true
+
+    @JvmStatic
+    var isMessageViewMoveActionVisible = false
+
+    @JvmStatic
+    var isMessageViewCopyActionVisible = false
+
+    @JvmStatic
+    var isMessageViewSpamActionVisible = false
 
     @JvmStatic
     var pgpInlineDialogCounter: Int = 0
@@ -175,6 +193,7 @@ object K9 : KoinComponent {
     @JvmStatic
     @Suppress("LongMethod")
     fun loadPrefs(storage: Storage) {
+        isShowAccountSelector = storage.getBoolean("showAccountSelector", true)
         messageViewPostMarkAsUnreadNavigation =
             storage.getEnum("messageViewPostMarkAsUnreadAction", PostMarkAsUnreadNavigation.ReturnToMessageList)
 
@@ -192,6 +211,11 @@ object K9 : KoinComponent {
             .onDisabledOrUnavailable {
                 fontSizes.load(storage)
             }
+        isMessageViewArchiveActionVisible = storage.getBoolean("messageViewArchiveActionVisible", false)
+        isMessageViewDeleteActionVisible = storage.getBoolean("messageViewDeleteActionVisible", true)
+        isMessageViewMoveActionVisible = storage.getBoolean("messageViewMoveActionVisible", false)
+        isMessageViewCopyActionVisible = storage.getBoolean("messageViewCopyActionVisible", false)
+        isMessageViewSpamActionVisible = storage.getBoolean("messageViewSpamActionVisible", false)
 
         pgpInlineDialogCounter = storage.getInt("pgpInlineDialogCounter", 0)
         pgpSignOnlyDialogCounter = storage.getInt("pgpSignOnlyDialogCounter", 0)
@@ -207,11 +231,18 @@ object K9 : KoinComponent {
 
     @Suppress("LongMethod")
     internal fun save(editor: StorageEditor) {
+        editor.putBoolean("showAccountSelector", isShowAccountSelector)
         editor.putEnum("messageViewPostMarkAsUnreadAction", messageViewPostMarkAsUnreadNavigation)
 
         editor.putEnum("sortTypeEnum", sortType)
         editor.putBoolean("sortAscending", sortAscending[sortType] ?: false)
         editor.putString("lockScreenNotificationVisibility", lockScreenNotificationVisibility.toString())
+
+        editor.putBoolean("messageViewArchiveActionVisible", isMessageViewArchiveActionVisible)
+        editor.putBoolean("messageViewDeleteActionVisible", isMessageViewDeleteActionVisible)
+        editor.putBoolean("messageViewMoveActionVisible", isMessageViewMoveActionVisible)
+        editor.putBoolean("messageViewCopyActionVisible", isMessageViewCopyActionVisible)
+        editor.putBoolean("messageViewSpamActionVisible", isMessageViewSpamActionVisible)
 
         editor.putInt("pgpInlineDialogCounter", pgpInlineDialogCounter)
         editor.putInt("pgpSignOnlyDialogCounter", pgpSignOnlyDialogCounter)

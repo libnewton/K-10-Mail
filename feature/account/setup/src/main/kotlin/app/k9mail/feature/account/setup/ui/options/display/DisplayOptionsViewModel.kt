@@ -1,6 +1,7 @@
 package app.k9mail.feature.account.setup.ui.options.display
 
 import androidx.lifecycle.viewModelScope
+import app.k9mail.core.ui.compose.common.mvi.BaseViewModel
 import app.k9mail.feature.account.common.domain.AccountDomainContract
 import app.k9mail.feature.account.setup.AccountSetupExternalContract
 import app.k9mail.feature.account.setup.ui.options.display.DisplayOptionsContract.Effect
@@ -10,7 +11,6 @@ import app.k9mail.feature.account.setup.ui.options.display.DisplayOptionsContrac
 import app.k9mail.feature.account.setup.ui.options.display.DisplayOptionsContract.ViewModel
 import kotlinx.coroutines.launch
 import net.thunderbird.core.outcome.Outcome
-import net.thunderbird.core.ui.contract.mvi.BaseViewModel
 import net.thunderbird.core.validation.input.StringInputField
 
 internal class DisplayOptionsViewModel(

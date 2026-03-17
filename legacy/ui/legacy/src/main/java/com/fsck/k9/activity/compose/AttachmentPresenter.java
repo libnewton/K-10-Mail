@@ -83,9 +83,9 @@ public class AttachmentPresenter {
             attachments.put(attachment.uri, attachment);
             attachmentMvpView.addAttachmentView(attachment);
 
-            if (attachment.getState() == LoadingState.URI_ONLY) {
+            if (attachment.state == LoadingState.URI_ONLY) {
                 initAttachmentInfoLoader(attachment);
-            } else if (attachment.getState() == LoadingState.METADATA) {
+            } else if (attachment.state == LoadingState.METADATA) {
                 initAttachmentContentLoader(attachment);
             }
         }
@@ -183,8 +183,7 @@ public class AttachmentPresenter {
         attachment = attachment.deriveWithMetadataLoaded(
                 attachmentViewInfo.mimeType, attachmentViewInfo.displayName, attachmentViewInfo.size);
 
-        inlineAttachments.put(
-            attachment.uri, new InlineAttachment(attachmentViewInfo.part.getContentId(), attachment));
+        inlineAttachments.put(attachment.uri, new InlineAttachment(attachmentViewInfo.part.getContentId(), attachment));
 
         Bundle bundle = new Bundle();
         bundle.putParcelable(LOADER_ARG_ATTACHMENT, attachment.uri);
@@ -248,9 +247,9 @@ public class AttachmentPresenter {
         listener.onAttachmentAdded();
         attachmentMvpView.addAttachmentView(attachment);
 
-        if (attachment.getState() == LoadingState.URI_ONLY) {
+        if (attachment.state == LoadingState.URI_ONLY) {
             initAttachmentInfoLoader(attachment);
-        } else if (attachment.getState() == LoadingState.METADATA) {
+        } else if (attachment.state == LoadingState.METADATA) {
             initAttachmentContentLoader(attachment);
         } else {
             throw new IllegalStateException("Attachment can only be added in URI_ONLY or METADATA state!");
@@ -258,7 +257,7 @@ public class AttachmentPresenter {
     }
 
     private void initAttachmentInfoLoader(Attachment attachment) {
-        if (attachment.getState() != LoadingState.URI_ONLY) {
+        if (attachment.state != LoadingState.URI_ONLY) {
             throw new IllegalStateException("initAttachmentInfoLoader can only be called for URI_ONLY state!");
         }
 
@@ -268,7 +267,7 @@ public class AttachmentPresenter {
     }
 
     private void initAttachmentContentLoader(Attachment attachment) {
-        if (attachment.getState() != LoadingState.METADATA) {
+        if (attachment.state != LoadingState.METADATA) {
             throw new IllegalStateException("initAttachmentContentLoader can only be called for METADATA state!");
         }
 
@@ -301,7 +300,7 @@ public class AttachmentPresenter {
                         return;
                     }
 
-                    if (attachment.getState() == LoadingState.METADATA) {
+                    if (attachment.state == LoadingState.METADATA) {
                         attachmentMvpView.updateAttachmentView(attachment);
                         attachments.put(attachment.uri, attachment);
                         initAttachmentContentLoader(attachment);
@@ -334,7 +333,7 @@ public class AttachmentPresenter {
                         return;
                     }
 
-                    if (attachment.getState() == Attachment.LoadingState.COMPLETE) {
+                    if (attachment.state == Attachment.LoadingState.COMPLETE) {
                         attachmentMvpView.updateAttachmentView(attachment);
                         attachments.put(attachment.uri, attachment);
                     } else {
@@ -364,7 +363,7 @@ public class AttachmentPresenter {
                     int loaderId = loader.getId();
                     loaderManager.destroyLoader(loaderId);
 
-                    if (attachment.getState() == Attachment.LoadingState.COMPLETE) {
+                    if (attachment.state == Attachment.LoadingState.COMPLETE) {
                         inlineAttachments.put(attachment.uri, new InlineAttachment(
                                 inlineAttachments.get(attachment.uri).getContentId(), attachment));
                     } else {

@@ -3,7 +3,6 @@ package com.fsck.k9.message
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
-import android.net.Uri
 import android.os.Parcelable
 import assertk.Assert
 import assertk.all
@@ -683,7 +682,7 @@ class PgpMessageBuilderTest : K9RobolectricTest() {
         val cryptoStatus = defaultCryptoStatus.copy(cryptoMode = CryptoMode.SIGN_ONLY, isPgpInlineModeEnabled = true)
 
         pgpMessageBuilder.setCryptoStatus(cryptoStatus)
-        pgpMessageBuilder.setAttachments(listOf(Attachment.createAttachment(Uri.EMPTY, 0, null, true, true)))
+        pgpMessageBuilder.setAttachments(listOf(Attachment.createAttachment(null, 0, null, true, true)))
 
         val mockCallback = mock(Callback::class.java)
         pgpMessageBuilder.buildAsync(mockCallback)
@@ -700,7 +699,7 @@ class PgpMessageBuilderTest : K9RobolectricTest() {
             defaultCryptoStatus.copy(cryptoMode = CryptoMode.CHOICE_ENABLED, isPgpInlineModeEnabled = true)
 
         pgpMessageBuilder.setCryptoStatus(cryptoStatus)
-        pgpMessageBuilder.setAttachments(listOf(Attachment.createAttachment(Uri.EMPTY, 0, null, true, true)))
+        pgpMessageBuilder.setAttachments(listOf(Attachment.createAttachment(null, 0, null, true, true)))
 
         val mockCallback = mock(Callback::class.java)
         pgpMessageBuilder.buildAsync(mockCallback)

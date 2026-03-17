@@ -10,7 +10,7 @@ The application follows a modular architecture with clear separation between dif
 - **🔀 Separation of Concerns**: Each module focuses on a specific aspect of the application
 - **⬇️ Dependency Inversion**: Higher-level modules do not depend on lower-level modules directly
 - **🎯 Single Responsibility**: Each component has a single responsibility
-- **🔄 API/Internal Separation**: Clear separation between public APIs and internal implementation details
+- **🔄 API/Implementation Separation**: Clear separation between public APIs and implementation details
 - **🧹 Clean Architecture**: Separation of UI, domain, and data layers
 - **🧪 Testability**: The architecture facilitates comprehensive testing at all levels
 
@@ -38,18 +38,18 @@ For more details on the module organization and structure, see the [Module Organ
 
 The architecture follows several key patterns to ensure maintainability, testability, and separation of concerns:
 
-### 🔄 API/Internal Separation
+### 🔄 API/Implementation Separation
 
-Each module should be split into two main parts: **API** and **internal**. This separation provides clear
+Each module should be split into two main parts: **API** and **implementation**. This separation provides clear
 boundaries between what a module exposes to other modules and how it implements its functionality internally:
 
 - **📝 API**: Public interfaces, models, and contracts
-- **⚙️ Internal**: Concrete implementations of the interfaces, private to the module
+- **⚙️ Implementation**: Concrete implementations of the interfaces
 
 This separation provides clear boundaries, improves testability, and enables flexibility.
 
 See [API Module](module-structure.md#-api-module) and
-[Internal Module](module-structure.md#-internal-module) for more details.
+[Implementation Module](module-structure.md#-implementation-module) for more details.
 
 ### Clean Architecture
 
@@ -162,7 +162,7 @@ graph TB
 The data layer is responsible for data retrieval, storage, and synchronization.
 
 **Key Components:**
-- **📦 Repository implementations**: Internal implementations of repository interfaces from the domain layer
+- **📦 Repository implementations**: Implement repository interfaces from the domain layer
 - **🔌 Data Sources**: Provide data from specific sources (API, database, preferences)
 - **📄 Data Transfer Objects**: Represent data at the data layer
 
@@ -292,7 +292,7 @@ The offline-first approach is implemented across all layers of the application:
 1. **💾 Data Layer**:
    - 📊 Local database as the primary data source
    - 🌐 Remote data source for server communication
-   - 📦 Repository pattern to coordinate between data sources in the internal module
+   - 📦 Repository pattern to coordinate between data sources
    - 🔄 Synchronization manager to handle data syncing
 2. **🧠 Domain Layer**:
    - ⚙️ Use cases handle both online and offline scenarios

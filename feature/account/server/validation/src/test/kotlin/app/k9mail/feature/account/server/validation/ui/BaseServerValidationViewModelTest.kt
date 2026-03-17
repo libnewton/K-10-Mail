@@ -23,28 +23,15 @@ import com.fsck.k9.mail.AuthType
 import com.fsck.k9.mail.ConnectionSecurity
 import com.fsck.k9.mail.ServerSettings
 import com.fsck.k9.mail.server.ServerSettingsValidationResult
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import net.thunderbird.core.testing.coroutines.MainDispatcherHelper
+import net.thunderbird.core.testing.coroutines.MainDispatcherRule
+import org.junit.Rule
+import org.junit.Test
 
 abstract class BaseServerValidationViewModelTest<T : BaseServerValidationViewModel> {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val mainDispatcher = MainDispatcherHelper(UnconfinedTestDispatcher())
-
-    @BeforeTest
-    fun setUp() {
-        mainDispatcher.setUp()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        mainDispatcher.tearDown()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Test
     fun `should update state when LoadAccountStateAndValidate event received and validate`() = runMviTest {

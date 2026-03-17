@@ -22,32 +22,19 @@ import com.fsck.k9.mail.FolderType
 import com.fsck.k9.mail.folders.FolderFetcherException
 import com.fsck.k9.mail.folders.FolderServerId
 import com.fsck.k9.mail.folders.RemoteFolder
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import net.thunderbird.core.outcome.Outcome
-import net.thunderbird.core.testing.coroutines.MainDispatcherHelper
+import net.thunderbird.core.testing.coroutines.MainDispatcherRule
 import net.thunderbird.core.validation.ValidationError
 import net.thunderbird.core.validation.ValidationOutcome
 import net.thunderbird.core.validation.ValidationSuccess
+import org.junit.Rule
+import org.junit.Test
 
 class SpecialFoldersViewModelTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val mainDispatcher = MainDispatcherHelper(UnconfinedTestDispatcher())
-
-    @BeforeTest
-    fun setUp() {
-        mainDispatcher.setUp()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        mainDispatcher.tearDown()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Test
     fun `should load folders, validate and save successfully when LoadSpecialFolders event received and setup valid`() =
@@ -260,7 +247,7 @@ class SpecialFoldersViewModelTest {
 
         // Turbine misses the intermediate state because we're using UnconfinedTestDispatcher and StateFlow.
         // Here we need to make sure the coroutine used to load the special folder options has completed.
-        mainDispatcher.testDispatcher.scheduler.advanceUntilIdle()
+        mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(turbines.awaitStateItem()).isEqualTo(
             State(

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import app.k9mail.core.android.common.contact.ContactRepository
 import app.k9mail.core.ui.compose.designsystem.atom.CircularProgressIndicator
@@ -28,6 +27,9 @@ import app.k9mail.core.ui.compose.theme2.MainTheme
 import com.fsck.k9.ui.messagelist.MessageListAppearance
 import com.fsck.k9.ui.messagelist.MessageListItem
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import net.thunderbird.core.preference.display.visualSettings.message.list.UiDensity
 import net.thunderbird.core.ui.compose.designsystem.organism.message.ActiveMessageItem
 import net.thunderbird.core.ui.compose.designsystem.organism.message.MessageItemDefaults
@@ -50,7 +52,10 @@ internal fun MessageItemContent(
     onFavouriteClick: (Boolean) -> Unit,
     appearance: MessageListAppearance,
 ) {
-    val receivedAt = item.displayMessageDateTime
+    val receivedAt = remember(item.messageDate) {
+        Instant.fromEpochMilliseconds(item.messageDate)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+    }
 
     val uri by remember(item.displayAddress?.address) {
         mutableStateOf(
@@ -70,7 +75,7 @@ internal fun MessageItemContent(
 
     when {
         isActive -> ActiveMessageItem(
-            sender = buildAnnotatedString { append("${item.displayName}") },
+            sender = "${item.displayName}",
             subject = item.subject ?: "n/a",
             preview = item.previewText,
             receivedAt = receivedAt,
@@ -99,7 +104,7 @@ internal fun MessageItemContent(
         )
 
         item.isRead -> ReadMessageItem(
-            sender = buildAnnotatedString { append("${item.displayName}") },
+            sender = "${item.displayName}",
             subject = item.subject ?: "n/a",
             preview = item.previewText,
             receivedAt = receivedAt,
@@ -128,7 +133,7 @@ internal fun MessageItemContent(
         )
 
         else -> UnreadMessageItem(
-            sender = buildAnnotatedString { append("${item.displayName}") },
+            sender = "${item.displayName}",
             subject = item.subject ?: "n/a",
             preview = item.previewText,
             receivedAt = receivedAt,

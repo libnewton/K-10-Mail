@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import app.k9mail.feature.launcher.ui.FeatureLauncherApp
 import com.fsck.k9.ui.base.BaseActivity
 
@@ -22,12 +21,6 @@ class FeatureLauncherActivity : BaseActivity() {
         fun launch(context: Context, target: FeatureLauncherTarget) {
             val intent = getIntent(context, target)
             context.startActivity(intent)
-        }
-
-        @JvmStatic
-        fun launch(context: Context, target: FeatureLauncherTarget, launcher: ActivityResultLauncher<Intent>) {
-            val intent = getIntent(context, target)
-            launcher.launch(intent)
         }
 
         @JvmStatic

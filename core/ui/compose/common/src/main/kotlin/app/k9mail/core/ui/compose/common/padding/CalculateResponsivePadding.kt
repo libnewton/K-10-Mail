@@ -10,7 +10,7 @@ import app.k9mail.core.ui.compose.common.window.getWindowSizeInfo
 fun calculateResponsiveWidthPadding(): PaddingValues {
     val windowSizeInfo = getWindowSizeInfo()
     val horizontalPadding = when (windowSizeInfo.screenWidthSizeClass) {
-        WindowSizeClass.Small, WindowSizeClass.Compact -> 0.dp
+        WindowSizeClass.Compact -> 0.dp
 
         WindowSizeClass.Medium -> (windowSizeInfo.screenWidth - WindowSizeClass.COMPACT_MAX_WIDTH.dp) / 2
 

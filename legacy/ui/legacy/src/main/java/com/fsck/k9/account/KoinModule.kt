@@ -1,7 +1,6 @@
 package com.fsck.k9.account
 
 import androidx.work.WorkerParameters
-import net.thunderbird.feature.account.settings.api.BackgroundAccountRemover
 import org.koin.dsl.module
 
 val accountModule = module {
@@ -16,6 +15,7 @@ val accountModule = module {
             avatarImageRepository = get(),
         )
     }
+    factory { BackgroundAccountRemover(get()) }
     factory { (parameters: WorkerParameters) ->
         AccountRemoverWorker(
             accountRemover = get(),
@@ -23,8 +23,5 @@ val accountModule = module {
             context = get(),
             workerParams = parameters,
         )
-    }
-    factory<BackgroundAccountRemover> {
-        DefaultBackgroundAccountRemover(get())
     }
 }

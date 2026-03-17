@@ -162,7 +162,6 @@ include(
     ":core:common",
     ":core:configstore:api",
     ":core:configstore:impl-backend",
-    ":core:configstore:testing",
     ":core:featureflag",
     ":core:logging:api",
     ":core:logging:config",
@@ -191,7 +190,6 @@ include(
 )
 
 include(
-    ":core:ui:contract",
     ":core:ui:setting:api",
     ":core:ui:setting:component",
     ":core:ui:setting:impl-dialog",

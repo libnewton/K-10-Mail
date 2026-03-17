@@ -1,6 +1,7 @@
 package app.k9mail.feature.account.edit.ui.server.settings.save
 
 import androidx.lifecycle.viewModelScope
+import app.k9mail.core.ui.compose.common.mvi.BaseViewModel
 import app.k9mail.feature.account.common.ui.WizardConstants
 import app.k9mail.feature.account.edit.domain.AccountEditDomainContract
 import app.k9mail.feature.account.edit.ui.server.settings.save.SaveServerSettingsContract.Effect
@@ -11,7 +12,6 @@ import app.k9mail.feature.account.edit.ui.server.settings.save.SaveServerSetting
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.thunderbird.core.ui.contract.mvi.BaseViewModel
 
 abstract class BaseSaveServerSettingsViewModel(
     val accountUuid: String,

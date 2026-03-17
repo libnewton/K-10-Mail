@@ -160,7 +160,6 @@ class ChooseFolderActivity : BaseActivity() {
     private fun configureFolderSearchView(menu: Menu) {
         val folderMenuItem = menu.findItem(R.id.filter_folders)
         val folderSearchView = folderMenuItem.actionView as SearchView
-        folderSearchView.maxWidth = Int.MAX_VALUE
         folderSearchView.queryHint = getString(R.string.folder_list_filter_hint)
         folderSearchView.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {

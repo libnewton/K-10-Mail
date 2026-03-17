@@ -15,7 +15,6 @@ import net.thunderbird.core.preference.GeneralSettingsManager
 import net.thunderbird.core.preference.NotificationQuickDelete
 import net.thunderbird.core.preference.SplitViewMode
 import net.thunderbird.core.preference.SubTheme
-import net.thunderbird.core.preference.display.visualSettings.message.list.MessageListDateTimeFormat
 import net.thunderbird.core.preference.display.visualSettings.message.list.UiDensity
 import net.thunderbird.core.preference.update
 
@@ -151,7 +150,6 @@ class GeneralSettingsDataStore(
             "message_compose_theme" -> subThemeToString(coreSettings.messageComposeTheme)
             "messageViewTheme" -> subThemeToString(coreSettings.messageViewTheme)
             "messagelist_preview_lines" -> messageListSettings.previewLines.toString()
-            "message_list_date_time_format" -> messageListSettings.dateTimeFormat.toString()
             "splitview_mode" -> coreSettings.splitViewMode.name
             "notification_quick_delete" -> notificationSettings.notificationQuickDeleteBehaviour.name
             "lock_screen_notification_visibility" -> K9.lockScreenNotificationVisibility.name
@@ -191,7 +189,6 @@ class GeneralSettingsDataStore(
             "message_compose_theme" -> setMessageComposeTheme(value)
             "messageViewTheme" -> setMessageViewTheme(value)
             "messagelist_preview_lines" -> setMessageListPreviewLines(value.toInt())
-            "message_list_date_time_format" -> updateMessageListDateTimeFormat(value)
             "splitview_mode" -> setSplitViewModel(SplitViewMode.valueOf(value.uppercase()))
             "notification_quick_delete" -> {
                 setNotificationQuickDeleteBehaviour(
@@ -232,7 +229,6 @@ class GeneralSettingsDataStore(
     }
 
     override fun getStringSet(key: String, defValues: Set<String>?): Set<String>? {
-        val visualSettings = generalSettingsManager.getConfig().display.visualSettings
         return when (key) {
             "confirm_actions" -> {
                 mutableSetOf<String>().apply {
@@ -248,11 +244,11 @@ class GeneralSettingsDataStore(
 
             "messageview_visible_refile_actions" -> {
                 mutableSetOf<String>().apply {
-                    if (visualSettings.isMessageViewDeleteActionVisible) add("delete")
-                    if (visualSettings.isMessageViewArchiveActionVisible) add("archive")
-                    if (visualSettings.isMessageViewMoveActionVisible) add("move")
-                    if (visualSettings.isMessageViewCopyActionVisible) add("copy")
-                    if (visualSettings.isMessageViewSpamActionVisible) add("spam")
+                    if (K9.isMessageViewDeleteActionVisible) add("delete")
+                    if (K9.isMessageViewArchiveActionVisible) add("archive")
+                    if (K9.isMessageViewMoveActionVisible) add("move")
+                    if (K9.isMessageViewCopyActionVisible) add("copy")
+                    if (K9.isMessageViewSpamActionVisible) add("spam")
                 }
             }
 
@@ -280,20 +276,11 @@ class GeneralSettingsDataStore(
             }
 
             "messageview_visible_refile_actions" -> {
-                skipSaveSettings = true
-                generalSettingsManager.update { settings ->
-                    settings.copy(
-                        display = settings.display.copy(
-                            visualSettings = settings.display.visualSettings.copy(
-                                isMessageViewArchiveActionVisible = "archive" in checkedValues,
-                                isMessageViewDeleteActionVisible = "delete" in checkedValues,
-                                isMessageViewMoveActionVisible = "move" in checkedValues,
-                                isMessageViewCopyActionVisible = "copy" in checkedValues,
-                                isMessageViewSpamActionVisible = "spam" in checkedValues,
-                            ),
-                        ),
-                    )
-                }
+                K9.isMessageViewDeleteActionVisible = "delete" in checkedValues
+                K9.isMessageViewArchiveActionVisible = "archive" in checkedValues
+                K9.isMessageViewMoveActionVisible = "move" in checkedValues
+                K9.isMessageViewCopyActionVisible = "copy" in checkedValues
+                K9.isMessageViewSpamActionVisible = "spam" in checkedValues
             }
 
             else -> return
@@ -875,21 +862,6 @@ class GeneralSettingsDataStore(
                     visualSettings = settings.display.visualSettings.copy(
                         messageListSettings = settings.display.visualSettings.messageListSettings.copy(
                             uiDensity = UiDensity.valueOf(value),
-                        ),
-                    ),
-                ),
-            )
-        }
-    }
-
-    private fun updateMessageListDateTimeFormat(value: String) {
-        skipSaveSettings = true
-        generalSettingsManager.update { settings ->
-            settings.copy(
-                display = settings.display.copy(
-                    visualSettings = settings.display.visualSettings.copy(
-                        messageListSettings = settings.display.visualSettings.messageListSettings.copy(
-                            dateTimeFormat = MessageListDateTimeFormat.valueOf(value),
                         ),
                     ),
                 ),

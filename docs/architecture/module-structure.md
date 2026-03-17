@@ -4,14 +4,8 @@ The Thunderbird for Android project is following a modularization approach, wher
 distinct modules. These modules encapsulate specific functionality and can be developed, tested, and maintained
 independently. This modular architecture promotes reusability, scalability, and maintainability of the codebase.
 
-Each module should be split into two main parts: **API** and **internal**. This separation provides clear
+Each module should be split into two main parts: **API** and **implementation**. This separation provides clear
 boundaries between what a module exposes to other modules and how it implements its functionality internally.
-
-> [!NOTE]
-> Prior to [ADR-0009](adr/0009-api-internal-split.md), the project used `:impl` suffix for implementation modules.
-> This naming has been changed to `:internal` to better reflect that these modules contain private implementation
-> details. The codebase is being gradually migrated from the old `:impl` naming to `:internal`. You may encounter
-> both naming conventions in the existing code, but all new modules should use the `:internal` suffix.
 
 When a feature is complex, it can be further split into sub modules, allowing for better organization and smaller modules
 for distinct functionalities within a feature domain.
@@ -49,7 +43,7 @@ API modules should follow the naming convention:
 
 ```bash
 feature:account:api
-├── src/main/kotlin/net/thunderbird/feature/account
+├── src/main/kotlin/net/thunderbird/feature/account/api
 │   ├── AccountManager.kt (interface)
 │   ├── Account.kt (entity)
 │   ├── AccountNavigation.kt (interface)
@@ -65,12 +59,12 @@ When designing APIs, follow these principles:
 - **Clear contracts**: Define clear method signatures with documented parameters and return values
 - **Error handling**: Define how errors are communicated (exceptions, result types, etc.)
 
-### ⚙️ Internal Module
+### ⚙️ Implementation Module
 
-The internal module depends on the API module but must not be depended upon by other modules (except for
-composition modules: `:app-common`, `:app-k9mail`, and `:app-thunderbird`).
+The implementation module depends on the API module but should not be depended upon by other modules (except for
+dependency injection setup).
 
-The internal module contains:
+The implementation module contains:
 
 - **Interface implementations**: Concrete implementations of the interfaces defined in the API module
 - **Internal components**: Classes and functions used internally
@@ -79,38 +73,38 @@ The internal module contains:
 
 #### Naming Convention
 
-Internal modules should follow the naming convention:
-- `feature:<feature-name>:internal` for standard implementation details
-- `feature:<feature-name>:internal-<variant>` for variant-specific implementation details
-- `core:<core-name>:internal` for core module implementation details
+Implementation modules should follow the naming convention:
+- `feature:<feature-name>:impl` for standard implementations
+- `feature:<feature-name>:impl-<variant>` for variant-specific implementations
+- `core:<core-name>:impl` for core module implementations
 
 #### Multiple Implementations
 
 When multiple implementations are needed, such as for different providers or platforms, they can be placed in separate
 modules and named accordingly:
-- `feature:account:internal-gmail` - Gmail-specific implementation
-- `feature:account:internal-yahoo` - Yahoo-specific implementation
-- `feature:account:internal-noop` - No-operation implementation for testing
+- `feature:account:impl-gmail` - Gmail-specific implementation
+- `feature:account:impl-yahoo` - Yahoo-specific implementation
+- `feature:account:impl-noop` - No-operation implementation for testing
 
 #### Example structure for a variant implementation:
 
 ```bash
-feature:account:internal-gmail
-├── src/main/kotlin/net/thunderbird/feature/account/internal/gmail
+feature:account:impl-gmail
+├── src/main/kotlin/app/thunderbird/feature/account/gmail
 │   └── GmailAccountManager.kt
 ```
 
-#### Clean Architecture in Internal Modules
+#### Clean Architecture in Implementation Modules
 
-A complex feature internal module should apply **Clean Architecture** principles, separating concerns into:
+A complex feature implementation module should apply **Clean Architecture** principles, separating concerns into:
 
 - **UI Layer**: Compose UI components, ViewModels, and UI state management
 - **Domain Layer**: Use cases, domain models, and business logic
 - **Data Layer**: Repositories, data sources, and data mapping
 
 ```bash
-feature:account:internal
-├── src/main/kotlin/net/thunderbird/feature/account/internal
+feature:account:impl
+├── src/main/kotlin/app/thunderbird/feature/account/impl
 │   ├── data/
 │   │   ├── repository/
 │   │   ├── datasource/
@@ -126,9 +120,9 @@ feature:account:internal
 
 #### Implementation Best Practices
 
+- **Internal visibility**: Use the `internal` modifier for classes and functions that should not be part of the public API
 - **Encapsulation**: Keep implementation details hidden from consumers
-- **Strict Visibility Control**: Within an `internal` module, everything should be marked with the `internal` visibility modifier by default. Only code explicitly required for dependency injection (e.g., Koin modules) or composition (if absolutely necessary) should remain `public`. This prevents accidental usage of implementation details even in modules that depend on the `internal` module (like `:app-common`).
-- **Testability**: Design internal code to be easily testable
+- **Testability**: Design implementations to be easily testable
 - **Dependency injection**: Use constructor injection for dependencies
 - **Error handling**: Implement robust error handling according to API contracts
 - **Performance**: Consider performance implications of implementations
@@ -158,7 +152,7 @@ Testing modules should follow the naming convention:
 
 ```bash
 feature:account:testing
-├── src/main/kotlin/net/thunderbird/feature/account/testing
+├── src/main/kotlin/app/thunderbird/feature/account/testing
 │   ├── AccountTestUtils.kt
 │   └── AccountTestMatchers.kt
 ```
@@ -198,7 +192,7 @@ Fake modules should follow the naming convention:
 
 ```bash
 feature:account:fake
-├── src/main/kotlin/net/thunderbird/feature/account/fake
+├── src/main/kotlin/app/thunderbird/feature/account/fake
 │   ├── FakeAccountRepository.kt
 │   ├── FakeAccountDataSource.kt
 │   ├── InMemoryAccountStore.kt
@@ -291,19 +285,19 @@ graph TB
         COMMON_APP["`**:app-common**<br>Integration Code`"]
     end
 
-    subgraph FEATURE[Feature Modules]
+    subgraph FEATURE[Feature]
         direction TB
-        FEATURE1["`**:feature:account:api**`"]
-        FEATURE2["`**:feature:account:internal**`"]
-        FEATURE3["`**:feature:settings:api**`"]
-        FEATURE_K9["`**:feature:k9Only:internal**`"]
-        FEATURE_TB["`**:feature:tbOnly:internal**`"]
+        FEATURE1[feature:account:api]
+        FEATURE2[feature:account:impl]
+        FEATURE3[Feature 2]
+        FEATURE_K9[Feature K-9 Only]
+        FEATURE_TB[Feature TfA Only]
     end
 
-    subgraph CORE[Core Modules]
+    subgraph CORE[Core]
         direction TB
-        CORE1["`**:core:ui:api**`"]
-        CORE2["`**:core:common:api**`"]
+        CORE1[Core 1]
+        CORE2[Core 2]
     end
 
     subgraph LIBRARY[Library]
@@ -369,13 +363,12 @@ These rules must be strictly followed:
 1. **One-Way Dependencies**:
    - Modules should not depend on each other in a circular manner
    - Dependencies should form a directed acyclic graph (DAG)
-2. **API-Internal Separation**:
-   - Other modules must only declare dependencies on `:feature:*:api` or `:core:*:api` of other areas.
-   - Depending on `:feature:*:internal` or `:core:*:internal` from a different area is prohibited.
-   - Binding of contracts to implementations happens in central composition modules: `:app-common`, `:app-k9mail`, and `:app-thunderbird`.
+2. **API-Implementation Separation**:
+   - Modules should depend only on API modules, not implementation modules
+   - Implementation modules should be referenced only in dependency injection setup
 3. **Feature Integration**:
    - Features should be integrated through the App Common module, which acts as a central hub
-   - Direct dependencies between feature internal modules should be avoided, or limited to API modules
+   - Direct dependencies between feature implementations should be avoided, or limited to API modules
 4. **Dependency Direction**:
    - Dependencies should flow from app modules to common, then to features, and finally to core and libraries
    - Higher-level modules should depend on lower-level modules, not vice versa

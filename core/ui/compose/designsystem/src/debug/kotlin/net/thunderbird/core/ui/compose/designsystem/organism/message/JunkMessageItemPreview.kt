@@ -18,6 +18,10 @@ import androidx.compose.ui.unit.dp
 import app.k9mail.core.ui.compose.designsystem.PreviewWithThemes
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextTitleSmall
 import app.k9mail.core.ui.compose.theme2.MainTheme
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 private class JunkMessageItemPrevParamCol : CollectionPreviewParameterProvider<MessageItemPrevParams>(
     collection = listOf(
@@ -109,7 +113,7 @@ private fun PreviewDefault(
             sender = params.sender,
             subject = params.subject,
             preview = params.preview,
-            receivedAt = "12:34",
+            receivedAt = @OptIn(ExperimentalTime::class) Clock.System.now().toLocalDateTime(TimeZone.UTC),
             avatar = {
                 Box(
                     modifier = Modifier
@@ -147,7 +151,7 @@ private fun PreviewCompact(
             sender = params.sender,
             subject = params.subject,
             preview = params.preview,
-            receivedAt = "12:34",
+            receivedAt = @OptIn(ExperimentalTime::class) Clock.System.now().toLocalDateTime(TimeZone.UTC),
             avatar = { },
             onClick = { },
             onLongClick = { },
@@ -174,7 +178,7 @@ private fun PreviewRelaxed(
             sender = params.sender,
             subject = params.subject,
             preview = params.preview,
-            receivedAt = "12:34",
+            receivedAt = @OptIn(ExperimentalTime::class) Clock.System.now().toLocalDateTime(TimeZone.UTC),
             avatar = { },
             onClick = { },
             onLongClick = { },
@@ -201,7 +205,7 @@ private fun PreviewDefaultWithoutAccountIndicator(
             sender = params.sender,
             subject = params.subject,
             preview = params.preview,
-            receivedAt = "12:34",
+            receivedAt = @OptIn(ExperimentalTime::class) Clock.System.now().toLocalDateTime(TimeZone.UTC),
             avatar = {
                 Box(
                     modifier = Modifier

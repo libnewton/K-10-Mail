@@ -4,9 +4,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
@@ -15,13 +15,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,19 +38,26 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.k9mail.core.ui.compose.common.window.WindowSizeClass
-import app.k9mail.core.ui.compose.common.window.getWindowSizeInfo
 import app.k9mail.core.ui.compose.designsystem.atom.button.ButtonIcon
 import app.k9mail.core.ui.compose.designsystem.atom.button.ButtonIconDefaults
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextBodySmall
-import app.k9mail.core.ui.compose.designsystem.atom.text.TextTitleSmall
+import app.k9mail.core.ui.compose.designsystem.atom.text.TextLabelSmall
 import app.k9mail.core.ui.compose.theme2.LocalContentColor
 import app.k9mail.core.ui.compose.theme2.MainTheme
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
+import net.thunderbird.core.ui.compose.common.date.LocalDateTimeConfiguration
 import net.thunderbird.core.ui.compose.designsystem.atom.icon.Icon
 import net.thunderbird.core.ui.compose.designsystem.atom.icon.Icons
 import net.thunderbird.core.ui.compose.designsystem.molecule.message.AccountIndicatorIcon
-import net.thunderbird.core.ui.compose.designsystem.molecule.message.HeaderRow
-import net.thunderbird.core.ui.compose.designsystem.molecule.message.HeaderRowCompact
+
+private const val WEEK_DAYS = 7
 
 /**
  * Displays a single message item.
@@ -83,7 +88,7 @@ import net.thunderbird.core.ui.compose.designsystem.molecule.message.HeaderRowCo
  *  Defaults to [MessageItemDefaults.defaultContentPadding].
  * @see MessageItemDefaults
  */
-@Suppress("LongParameterList", "LongMethod")
+@Suppress("LongParameterList")
 @Composable
 internal fun MessageItem(
     leading: @Composable () -> Unit,
@@ -91,7 +96,7 @@ internal fun MessageItem(
     subject: @Composable () -> Unit,
     preview: CharSequence,
     action: @Composable () -> Unit,
-    receivedAt: String,
+    receivedAt: LocalDateTime,
     showAccountIndicator: Boolean,
     accountIndicatorColor: Color?,
     onClick: () -> Unit,
@@ -107,33 +112,6 @@ internal fun MessageItem(
     val outlineVariant = MainTheme.colors.outlineVariant
     var contentStart by remember { mutableFloatStateOf(0f) }
     val layoutDirection = LocalLayoutDirection.current
-
-    val windowSizeInfo = getWindowSizeInfo()
-    val isCompact = windowSizeInfo.screenWidthSizeClass == WindowSizeClass.Small
-
-    val headerRowContent: @Composable ((RowScope) -> Unit) =
-        remember(showAccountIndicator, accountIndicatorColor, receivedAt, sender, isCompact) {
-            movableContentOf { scope ->
-                with(scope) {
-                    SenderText(
-                        showAccountIndicator = showAccountIndicator,
-                        accountIndicatorColor = accountIndicatorColor,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .weight(1f, fill = false),
-                    ) {
-                        sender()
-                    }
-                    MessageItemDate(
-                        receivedAt = receivedAt,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .wrapContentWidth(),
-                    )
-                }
-            }
-        }
-
     Surface(
         modifier = modifier
             .combinedClickable(
@@ -158,24 +136,26 @@ internal fun MessageItem(
         color = colors.containerColor,
         contentColor = colors.contentColor,
     ) {
-        Row(modifier = Modifier.padding(contentPadding)) {
-            // Unread/New Indicator and Sender Avatar
-            Column(verticalArrangement = Arrangement.Center) {
-                LeadingElements(selected, onLeadingClick, leading)
-            }
+        Row(
+            modifier = Modifier
+                .padding(contentPadding)
+                .height(intrinsicSize = IntrinsicSize.Min),
+        ) {
+            LeadingElements(selected, onLeadingClick, leading)
             Spacer(modifier = Modifier.width(MainTheme.spacings.default))
-            // Message Content and Contents
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .onPlaced { contentStart = it.positionInParent().x },
             ) {
-                GetHeaderRow(isCompact, headerRowContent = headerRowContent)
-                MessageContent(colors = colors, preview = preview, maxPreviewLines = maxPreviewLines, subject = subject)
+                SenderRow(showAccountIndicator, accountIndicatorColor) { sender() }
+                SubjectRow(colors.subjectColor) { subject() }
+                Spacer(modifier = Modifier.height(MainTheme.spacings.half))
+                PreviewText(preview = preview, maxLines = maxPreviewLines)
             }
-            Spacer(modifier = Modifier.width(MainTheme.spacings.default))
-            // Message controls and interaction items
+            Spacer(modifier = Modifier.width(MainTheme.spacings.double))
             TrailingElements(
+                receivedAt = receivedAt,
                 action = action,
                 hasAttachments = hasAttachments,
                 modifier = Modifier.heightIn(min = MainTheme.sizes.large),
@@ -185,39 +165,7 @@ internal fun MessageItem(
 }
 
 @Composable
-private fun GetHeaderRow(
-    isCompact: Boolean,
-    modifier: Modifier = Modifier,
-    headerRowContent: @Composable ((RowScope) -> Unit),
-) {
-    if (isCompact) {
-        HeaderRowCompact(modifier, headerRowContent = headerRowContent)
-    } else {
-        HeaderRow(modifier, headerRowContent = headerRowContent)
-    }
-}
-
-@Composable
-private fun MessageContent(
-    preview: CharSequence,
-    maxPreviewLines: Int,
-    modifier: Modifier = Modifier,
-    colors: MessageItemColors = MessageItemDefaults.readMessageItemColors(),
-    subject: @Composable () -> Unit,
-) {
-    Row(modifier = modifier) {
-        Column {
-            SubjectText(colors.subjectColor) {
-                subject()
-            }
-            Spacer(modifier = Modifier.height(MainTheme.spacings.half))
-            PreviewText(preview = preview, maxLines = maxPreviewLines)
-        }
-    }
-}
-
-@Composable
-private fun SenderText(
+private fun SenderRow(
     showAccountIndicator: Boolean,
     accountIndicatorColor: Color?,
     modifier: Modifier = Modifier,
@@ -225,11 +173,9 @@ private fun SenderText(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .wrapContentWidth()
-            .defaultMinSize(
-                minHeight = AccountIndicatorIcon.ACCOUNT_INDICATOR_DEFAULT_HEIGHT,
-            ),
+        modifier = modifier.defaultMinSize(
+            minHeight = AccountIndicatorIcon.ACCOUNT_INDICATOR_DEFAULT_HEIGHT,
+        ),
     ) {
         if (showAccountIndicator && accountIndicatorColor != null) {
             AccountIndicatorIcon(accountIndicatorColor)
@@ -239,7 +185,7 @@ private fun SenderText(
 }
 
 @Composable
-private fun SubjectText(
+private fun SubjectRow(
     subjectColor: Color,
     content: @Composable () -> Unit,
 ) {
@@ -308,6 +254,7 @@ private fun SelectedIcon(
 
 @Composable
 private fun TrailingElements(
+    receivedAt: LocalDateTime,
     action: @Composable (() -> Unit),
     hasAttachments: Boolean,
     modifier: Modifier = Modifier,
@@ -317,6 +264,7 @@ private fun TrailingElements(
         verticalArrangement = Arrangement.spacedBy(MainTheme.spacings.half),
         modifier = modifier,
     ) {
+        MessageItemDate(receivedAt = receivedAt)
         action()
         if (hasAttachments) {
             Icon(
@@ -329,13 +277,41 @@ private fun TrailingElements(
 
 @Composable
 private fun MessageItemDate(
-    receivedAt: String,
+    receivedAt: LocalDateTime,
     modifier: Modifier = Modifier,
 ) {
-    TextTitleSmall(
-        text = receivedAt,
-        maxLines = 1,
-        overflow = TextOverflow.Visible,
-        modifier = modifier,
-    )
+    val dateTimeConfiguration = LocalDateTimeConfiguration.current
+    val formatter = LocalDateTime.Format {
+        @OptIn(ExperimentalTime::class)
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        when {
+            now.date == receivedAt.date -> {
+                hour()
+                char(':')
+                minute()
+            }
+
+            now.year != receivedAt.year -> {
+                year()
+                char('/')
+                monthNumber()
+                char('/')
+                day()
+            }
+
+            now.month == receivedAt.month && now.day - receivedAt.date.day < WEEK_DAYS -> {
+                dayOfWeek(dateTimeConfiguration.dayOfWeekNames)
+            }
+
+            else -> {
+                monthName(dateTimeConfiguration.monthNames)
+                char(' ')
+                day(padding = Padding.ZERO)
+            }
+        }
+    }
+    val formatted = remember(receivedAt) {
+        receivedAt.format(formatter)
+    }
+    TextLabelSmall(text = formatted, modifier = modifier)
 }

@@ -9,7 +9,6 @@ import java.io.IOException
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import net.thunderbird.core.file.MimeType
-import net.thunderbird.core.file.MimeTypeResolver
 import net.thunderbird.core.outcome.Outcome
 import net.thunderbird.feature.account.AccountId
 import net.thunderbird.feature.account.AccountIdFactory
@@ -25,7 +24,7 @@ class UpdateAvatarImageTest {
         val accountId = AccountIdFactory.create()
         val pickedUri = "file:///picked/image.jpg".toKmpUri()
         val repo = SuccessAvatarImageRepository()
-        val mimeTypeResolver = StubMimeTypeResolver(
+        val mimeTypeResolver = FakeMimeTypeResolver(
             mapOf(
                 pickedUri to MimeType.JPEG,
             ),
@@ -33,8 +32,10 @@ class UpdateAvatarImageTest {
         val useCase = UpdateAvatarImage(repo, mimeTypeResolver)
 
         // Act
+        val result = useCase(accountId, pickedUri)
+
         // Assert
-        when (val result = useCase(accountId, pickedUri)) {
+        when (result) {
             is Outcome.Success -> {
                 val avatar = result.data
                 assertThat(avatar).isInstanceOf(Avatar.Image::class)
@@ -53,7 +54,7 @@ class UpdateAvatarImageTest {
         val accountId = AccountIdFactory.create()
         val pickedUri = "file:///picked/image.jpg".toKmpUri()
         val failingRepo = FailingAvatarImageRepository()
-        val mimeTypeResolver = StubMimeTypeResolver(
+        val mimeTypeResolver = FakeMimeTypeResolver(
             mapOf(
                 pickedUri to MimeType.JPEG,
             ),
@@ -70,12 +71,12 @@ class UpdateAvatarImageTest {
     }
 
     @Test
-    fun `should store avatar image when mime type is PNG`() = runTest {
+    fun `should return UnsupportedFormat when mime type is not JPEG`() = runTest {
         // Arrange
         val accountId = AccountIdFactory.create()
         val pickedUri = "file:///picked/image.png".toKmpUri()
         val repo = SuccessAvatarImageRepository()
-        val mimeTypeResolver = StubMimeTypeResolver(
+        val mimeTypeResolver = FakeMimeTypeResolver(
             mapOf(
                 pickedUri to MimeType.PNG,
             ),
@@ -83,15 +84,12 @@ class UpdateAvatarImageTest {
         val useCase = UpdateAvatarImage(repo, mimeTypeResolver)
 
         // Act
+        val result = useCase(accountId, pickedUri)
+
         // Assert
-        when (val result = useCase(accountId, pickedUri)) {
-            is Outcome.Success -> {
-                val avatar = result.data
-                assertThat(avatar).isInstanceOf(Avatar.Image::class)
-                assertThat(avatar.uri).isEqualTo(repo.lastUpdatedUri?.toString())
-            }
-            else -> error("Expected Success but was $result")
-        }
+        assertThat(result).isInstanceOf(Outcome.Failure::class)
+        val error = (result as Outcome.Failure).error
+        assertThat(error).isInstanceOf(AccountSettingError.UnsupportedFormat::class)
     }
 
     @Test
@@ -100,7 +98,7 @@ class UpdateAvatarImageTest {
         val accountId = AccountIdFactory.create()
         val pickedUri = "file:///picked/image".toKmpUri()
         val repo = SuccessAvatarImageRepository()
-        val mimeTypeResolver = StubMimeTypeResolver(
+        val mimeTypeResolver = FakeMimeTypeResolver(
             mapOf(
                 pickedUri to null,
             ),
@@ -124,7 +122,7 @@ private class SuccessAvatarImageRepository : AvatarImageRepository {
     override suspend fun update(id: AccountId, imageUri: Uri): Uri {
         lastAccountId = id
         lastUpdatedUri = imageUri
-        // echo because test
+        // In a real repo this could return a different stored location; for the test we echo input
         return imageUri
     }
 
@@ -141,10 +139,4 @@ private class FailingAvatarImageRepository : AvatarImageRepository {
     override suspend fun delete(id: AccountId) {
         // not needed
     }
-}
-
-private class StubMimeTypeResolver(
-    private val mimeTypes: Map<Uri, MimeType?>,
-) : MimeTypeResolver {
-    override fun getMimeType(uri: Uri): MimeType? = mimeTypes[uri]
 }

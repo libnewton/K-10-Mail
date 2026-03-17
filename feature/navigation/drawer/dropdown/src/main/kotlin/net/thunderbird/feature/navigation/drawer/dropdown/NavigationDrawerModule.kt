@@ -74,6 +74,7 @@ val navigationDropDownDrawerModule: Module = module {
     viewModel {
         DrawerViewModel(
             getDrawerConfig = get(),
+            saveDrawerConfig = get(),
             getDisplayAccounts = get(),
             getDisplayFoldersForAccount = get(),
             getDisplayTreeFolder = get(),

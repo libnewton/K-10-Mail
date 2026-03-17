@@ -19,7 +19,6 @@ dependencies {
     implementation(projects.core.logging.api)
     implementation(projects.core.ui.theme.api)
     implementation(projects.feature.launcher)
-    implementation(projects.feature.account.settings.api)
     implementation(projects.core.common)
     implementation(projects.core.ui.compose.designsystem)
     implementation(projects.feature.navigation.drawer.api)

@@ -8,16 +8,15 @@ import app.k9mail.core.ui.compose.testing.mvi.turbinesWithInitialStateCheck
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.eygraber.uri.Uri
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.StandardTestDispatcher
 import net.thunderbird.core.logging.legacy.Log
 import net.thunderbird.core.logging.testing.TestLogger
 import net.thunderbird.core.outcome.Outcome
-import net.thunderbird.core.testing.coroutines.MainDispatcherHelper
+import net.thunderbird.core.testing.coroutines.MainDispatcherRule
 import net.thunderbird.core.validation.input.IntegerInputField
 import net.thunderbird.core.validation.input.StringInputField
 import net.thunderbird.feature.account.AccountId
@@ -28,20 +27,17 @@ import net.thunderbird.feature.account.settings.impl.domain.AccountSettingsDomai
 import net.thunderbird.feature.account.settings.impl.domain.AccountSettingsDomainContract.UpdateGeneralSettingCommand
 import net.thunderbird.feature.account.settings.impl.ui.general.GeneralSettingsContract.Effect
 import net.thunderbird.feature.account.settings.impl.ui.general.GeneralSettingsContract.State
+import org.junit.Before
+import org.junit.Rule
 
 class GeneralSettingsViewModelTest {
 
-    private val mainDispatcher = MainDispatcherHelper()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
 
-    @BeforeTest
+    @Before
     fun setUp() {
-        mainDispatcher.setUp()
         Log.logger = TestLogger()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        mainDispatcher.tearDown()
     }
 
     @Test

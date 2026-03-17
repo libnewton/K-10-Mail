@@ -1,7 +1,6 @@
 package com.fsck.k9.ui.settings.account
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,8 +9,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -22,6 +19,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.SwitchPreference
 import app.k9mail.feature.launcher.FeatureLauncherActivity
 import app.k9mail.feature.launcher.FeatureLauncherTarget
+import com.fsck.k9.account.BackgroundAccountRemover
 import com.fsck.k9.activity.ManageIdentities
 import com.fsck.k9.activity.setup.AccountSetupComposition
 import com.fsck.k9.controller.MessagingController
@@ -43,7 +41,6 @@ import net.thunderbird.core.android.account.AccountDefaultsProvider.Companion.NO
 import net.thunderbird.core.android.account.LegacyAccountDto
 import net.thunderbird.core.android.account.QuoteStyle
 import net.thunderbird.core.common.provider.AppNameProvider
-import net.thunderbird.feature.account.settings.api.BackgroundAccountRemover
 import net.thunderbird.feature.mail.folder.api.FolderType
 import net.thunderbird.feature.mail.folder.api.RemoteFolder
 import org.koin.android.ext.android.inject
@@ -71,14 +68,6 @@ class AccountSettingsFragment : PreferenceFragmentCompat(), ConfirmationDialogFr
     private var notificationLightPreference: ListPreference? = null
     private var notificationVibrationPreference: VibrationPreference? = null
 
-    private val launcherForActivityResult: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            closeAccountSettings()
-        }
-    }
-
     private val accountUuid: String by lazy {
         checkNotNull(arguments?.getString(ARG_ACCOUNT_UUID)) { "$ARG_ACCOUNT_UUID == null" }
     }
@@ -93,7 +82,6 @@ class AccountSettingsFragment : PreferenceFragmentCompat(), ConfirmationDialogFr
         title = preferenceScreen.title
 
         initializeGeneralSettings()
-        initializeReadingMail()
         initializeIncomingServer()
         initializeComposition()
         initializeManageIdentities()
@@ -142,6 +130,7 @@ class AccountSettingsFragment : PreferenceFragmentCompat(), ConfirmationDialogFr
 
     override fun onResume() {
         super.onResume()
+
         // we might be returning from OpenPgpAppSelectDialog, make sure settings are up to date
         val account = getAccount()
         initializeCryptoSettings(account)
@@ -163,16 +152,6 @@ class AccountSettingsFragment : PreferenceFragmentCompat(), ConfirmationDialogFr
             FeatureLauncherActivity.launch(
                 context = requireActivity(),
                 target = FeatureLauncherTarget.AccountSettings(accountUuid),
-            )
-        }
-    }
-
-    private fun initializeReadingMail() {
-        findPreference<Preference>(PREFERENCE_READING_MAIL)?.onClick {
-            FeatureLauncherActivity.launch(
-                context = requireActivity(),
-                target = FeatureLauncherTarget.AccountReadingMailSettings(accountUuid),
-                launcher = launcherForActivityResult,
             )
         }
     }
@@ -497,8 +476,6 @@ class AccountSettingsFragment : PreferenceFragmentCompat(), ConfirmationDialogFr
         internal const val PREFERENCE_OPENPGP = "openpgp"
         private const val ARG_ACCOUNT_UUID = "accountUuid"
         private const val PREFERENCE_GENERAL = "general"
-
-        private const val PREFERENCE_READING_MAIL = "reading_mail"
         private const val PREFERENCE_INCOMING_SERVER = "incoming"
         private const val PREFERENCE_COMPOSITION = "composition"
         private const val PREFERENCE_MANAGE_IDENTITIES = "manage_identities"

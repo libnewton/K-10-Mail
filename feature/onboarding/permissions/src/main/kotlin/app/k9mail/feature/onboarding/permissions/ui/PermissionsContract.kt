@@ -1,6 +1,6 @@
 package app.k9mail.feature.onboarding.permissions.ui
 
-import net.thunderbird.core.ui.contract.mvi.UnidirectionalViewModel
+import app.k9mail.core.ui.compose.common.mvi.UnidirectionalViewModel
 
 interface PermissionsContract {
     interface ViewModel : UnidirectionalViewModel<State, Event, Effect>

@@ -2,7 +2,7 @@ package net.thunderbird.ui.catalog.ui.page.atom
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import net.thunderbird.core.ui.contract.mvi.observe
+import app.k9mail.core.ui.compose.common.mvi.observe
 import net.thunderbird.ui.catalog.ui.page.CatalogPageContract.ViewModel
 import net.thunderbird.ui.catalog.ui.page.CatalogPageViewModel
 import org.koin.androidx.compose.koinViewModel

@@ -74,7 +74,6 @@ class RecipientPresenter(
 
     private var lastFocusedType = RecipientType.TO
     private var currentCryptoMode = CryptoMode.NO_CHOICE
-    private var forceShowCcBcc: Boolean = false
 
     var isForceTextMessageFormat = false
         private set
@@ -149,7 +148,6 @@ class RecipientPresenter(
 
     fun initFromReplyToMessage(message: Message?, isReplyAll: Boolean) {
         val replyToAddresses = if (isReplyAll) {
-            forceShowCcBcc = true
             replyToParser.getRecipientsToReplyAllTo(message, account)
         } else {
             replyToParser.getRecipientsToReplyTo(message, account)
@@ -334,7 +332,7 @@ class RecipientPresenter(
     fun onSwitchAccount(account: LegacyAccountDto) {
         this.account = account
 
-        if (isAlwaysShowCcBcc()) {
+        if (account.isAlwaysShowCcBcc) {
             recipientMvpView.setCcVisibility(true)
             recipientMvpView.setBccVisibility(true)
             updateRecipientExpanderVisibility()
@@ -559,7 +557,7 @@ class RecipientPresenter(
     }
 
     fun onNonRecipientFieldFocused() {
-        if (isAlwaysShowCcBcc().not()) {
+        if (!account.isAlwaysShowCcBcc) {
             hideEmptyExtendedRecipientFields()
         }
     }
@@ -750,10 +748,6 @@ class RecipientPresenter(
                 error("This icon should not be clickable while no special mode is active!")
             }
         }
-    }
-
-    private fun isAlwaysShowCcBcc(): Boolean {
-        return forceShowCcBcc || account.isAlwaysShowCcBcc
     }
 
     private fun Array<String>.toAddressArray(): Array<Address> {

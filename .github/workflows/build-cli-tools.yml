@@ -1,5 +1,4 @@
----
-name: Build - CLI Tools
+name: CLI Tools CI
 
 on:
   push:

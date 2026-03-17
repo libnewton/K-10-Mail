@@ -622,7 +622,7 @@ public class MessageCompose extends BaseActivity implements OnClickListener,
     }
 
     private void triggerIfNeededSentFolderNotFoundInAppNotification() {
-        if (account != null && account.isUploadSentMessages() && !account.hasSentFolder()) {
+        if (account != null && account.getSentFolderId() == null) {
             final SentFolderNotFoundNotification notification = NotificationFactoryCoroutineCompat.create(
                 continuation -> SentFolderNotFoundNotification(account.getUuid(), continuation)
             );
@@ -875,8 +875,7 @@ public class MessageCompose extends BaseActivity implements OnClickListener,
             return;
         }
 
-        if (account.isUploadSentMessages()
-            && !ignoreSentFolderNotAssigned && !account.hasSentFolder()) {
+        if (!ignoreSentFolderNotAssigned && !account.hasSentFolder()) {
             sentFolderNotFoundDialogFragmentFactory.show(account.getUuid(), getSupportFragmentManager());
             return;
         }
@@ -2008,20 +2007,20 @@ public class MessageCompose extends BaseActivity implements OnClickListener,
             }
 
             MaterialTextView nameView = view.findViewById(R.id.attachment_name);
-            boolean hasMetadata = (attachment.getState() != Attachment.LoadingState.URI_ONLY);
+            boolean hasMetadata = (attachment.state != Attachment.LoadingState.URI_ONLY);
             if (hasMetadata) {
-                nameView.setText(attachment.getName());
+                nameView.setText(attachment.name);
             } else {
                 nameView.setText(R.string.loading_attachment);
             }
 
-            if (attachment.getSize() != null && attachment.getSize() >= 0) {
+            if (attachment.size != null && attachment.size >= 0) {
                 MaterialTextView sizeView = view.findViewById(R.id.attachment_size);
-                sizeView.setText(sizeFormatter.formatSize(attachment.getSize()));
+                sizeView.setText(sizeFormatter.formatSize(attachment.size));
             }
 
             View progressBar = view.findViewById(R.id.progressBar);
-            boolean isLoadingComplete = (attachment.getState() == Attachment.LoadingState.COMPLETE);
+            boolean isLoadingComplete = (attachment.state == Attachment.LoadingState.COMPLETE);
             if (isLoadingComplete) {
                 if (attachment.isSupportedImage()) {
                     ImageView attachmentTypeView = view.findViewById(R.id.attachment_type);
@@ -2030,7 +2029,7 @@ public class MessageCompose extends BaseActivity implements OnClickListener,
                     ImageView preview = view.findViewById(R.id.attachment_preview);
                     preview.setVisibility(View.VISIBLE);
                     Glide.with(MessageCompose.this)
-                            .load(new File(attachment.getFileName()))
+                            .load(new File(attachment.filename))
                             .centerCrop()
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(preview);

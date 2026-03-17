@@ -2,6 +2,7 @@ package net.thunderbird.core.ui.compose.common.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.k9mail.core.ui.compose.common.mvi.UnidirectionalViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +11,6 @@ import kotlinx.coroutines.launch
 import net.thunderbird.core.common.state.StateMachine
 import net.thunderbird.core.common.state.sideeffect.StateSideEffectHandler
 import net.thunderbird.core.logging.Logger
-import net.thunderbird.core.ui.contract.mvi.UnidirectionalViewModel
 
 /**
  * An abstract base ViewModel that implements [UnidirectionalViewModel] and provides a

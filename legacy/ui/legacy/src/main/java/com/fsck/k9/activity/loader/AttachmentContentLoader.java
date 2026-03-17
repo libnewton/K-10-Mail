@@ -30,7 +30,7 @@ public class AttachmentContentLoader extends AsyncTaskLoader<Attachment> {
 
     public AttachmentContentLoader(Context context, Attachment attachment) {
         super(context);
-        if (attachment.getState() != LoadingState.METADATA) {
+        if (attachment.state != LoadingState.METADATA) {
             throw new IllegalArgumentException("Attachment provided to content loader must be in METADATA state");
         }
 
@@ -60,7 +60,7 @@ public class AttachmentContentLoader extends AsyncTaskLoader<Attachment> {
 
             InputStream in;
 
-            if (sourceAttachment.isInternalAttachment()) {
+            if (sourceAttachment.internalAttachment) {
                 ContentResolver unsafeContentResolver = context.getContentResolver();
                 in = unsafeContentResolver.openInputStream(sourceAttachment.uri);
             } else {
