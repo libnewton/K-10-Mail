@@ -13,8 +13,7 @@ val featureAccountAvatarModule = module {
         LocalAvatarImageDataSource(
             fileManager = get(),
             directoryProvider = get(),
-            mimeTypeResolver = get(),
-            clock = get(), // fetch the app's global 'Clock'
+            clock = get(),
         )
     }
 

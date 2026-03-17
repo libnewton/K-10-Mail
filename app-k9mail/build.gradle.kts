@@ -1,8 +1,8 @@
 plugins {
     id(ThunderbirdPlugins.App.androidCompose)
     alias(libs.plugins.dependency.guard)
-    alias(libs.plugins.tb.app.badging)
-    alias(libs.plugins.tb.app.versioning)
+    id("thunderbird.app.version.info")
+    id("thunderbird.quality.badging")
 }
 
 val testCoverageEnabled = hasProperty("testCoverageEnabled")
@@ -14,9 +14,8 @@ android {
         applicationId = "com.fsck.k9"
         testApplicationId = "com.fsck.k9.tests"
 
-        versionCode = 39004
-        versionName = "18.0"
-        versionNameSuffix = "a1"
+        versionCode = 39034
+        versionName = "17.0"
 
         buildConfigField("String", "CLIENT_INFO_APP_NAME", "\"K-9 Mail\"")
     }
@@ -85,13 +84,10 @@ android {
     }
 
     buildTypes {
-        val isCI = project.findProperty("ci") == "true"
         release {
             signingConfig = signingConfigs.getByType(SigningType.K9_RELEASE)
 
-            isMinifyEnabled = !isCI
-            isShrinkResources = !isCI
-
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro",

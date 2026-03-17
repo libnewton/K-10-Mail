@@ -14,7 +14,6 @@ class MessageListItemMapper(
     private val account: LegacyAccount,
     private val messageListPreferencesManager: MessageListPreferencesManager,
     private val outboxFolderManager: OutboxFolderManager,
-    private val formatDate: (Long) -> String,
 ) : MessageMapper<MessageListItem> {
 
     override fun map(message: MessageDetailsAccessor): MessageListItem {
@@ -37,7 +36,6 @@ class MessageListItemMapper(
         } else {
             messageHelper.getSenderDisplayName(displayAddress)
         }
-        val displayMessageDateTime = formatDate(message.messageDate)
 
         return MessageListItem(
             account,
@@ -47,7 +45,6 @@ class MessageListItemMapper(
             message.internalDate,
             displayName,
             displayAddress,
-            displayMessageDateTime,
             previewText,
             isMessageEncrypted,
             message.isRead,

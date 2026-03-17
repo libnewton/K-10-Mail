@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import app.k9mail.core.android.common.contact.ContactRepository
 import app.k9mail.legacy.message.controller.MessageReference
 import com.fsck.k9.contacts.ContactPictureLoader
+import com.fsck.k9.ui.helper.RelativeDateTimeFormatter
 import com.fsck.k9.ui.messagelist.item.BannerInlineListInAppNotificationViewHolder
 import com.fsck.k9.ui.messagelist.item.ComposableMessageViewHolder
 import com.fsck.k9.ui.messagelist.item.FooterViewHolder
@@ -43,7 +44,8 @@ class MessageListAdapter internal constructor(
     private val layoutInflater: LayoutInflater,
     private val contactsPictureLoader: ContactPictureLoader,
     private val listItemListener: MessageListItemActionListener,
-    private val appearance: () -> MessageListAppearance,
+    private val appearance: MessageListAppearance,
+    private val relativeDateTimeFormatter: RelativeDateTimeFormatter,
     private val themeProvider: FeatureThemeProvider,
     private val featureFlagProvider: FeatureFlagProvider,
     private val contactRepository: ContactRepository,
@@ -235,6 +237,7 @@ class MessageListAdapter internal constructor(
             appearance = appearance,
             res = res,
             contactsPictureLoader = contactsPictureLoader,
+            relativeDateTimeFormatter = relativeDateTimeFormatter,
             colors = colors,
             theme = theme,
             onClickListener = messageClickedListener,
@@ -347,7 +350,7 @@ class MessageListAdapter internal constructor(
     private fun calculateSelectionCount(): Int {
         return when {
             selected.isEmpty() -> 0
-            !appearance().showingThreadedList -> selected.size
+            !appearance.showingThreadedList -> selected.size
             else ->
                 viewItems
                     .asSequence()

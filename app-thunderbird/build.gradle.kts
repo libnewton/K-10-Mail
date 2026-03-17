@@ -1,8 +1,8 @@
 plugins {
     id(ThunderbirdPlugins.App.androidCompose)
     alias(libs.plugins.dependency.guard)
-    alias(libs.plugins.tb.app.badging)
-    alias(libs.plugins.tb.app.versioning)
+    id("thunderbird.app.version.info")
+    id("thunderbird.quality.badging")
 }
 
 val testCoverageEnabled = hasProperty("testCoverageEnabled")
@@ -14,8 +14,8 @@ android {
         applicationId = "net.thunderbird.android"
         testApplicationId = "net.thunderbird.android.tests"
 
-        versionCode = 4
-        versionName = "18.0"
+        versionCode = 21
+        versionName = "17.0"
 
         buildConfigField("String", "CLIENT_INFO_APP_NAME", "\"Thunderbird for Android\"")
     }
@@ -88,12 +88,25 @@ android {
     }
 
     buildTypes {
-        val isCI = project.findProperty("ci") == "true"
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-SNAPSHOT"
+
+            enableUnitTestCoverage = testCoverageEnabled
+            enableAndroidTestCoverage = testCoverageEnabled
+
+            isMinifyEnabled = false
+            isShrinkResources = false
+            isDebuggable = true
+
+            buildConfigField("String", "GLEAN_RELEASE_CHANNEL", "null")
+        }
+
         release {
             signingConfig = signingConfigs.getByType(SigningType.TB_RELEASE)
 
-            isMinifyEnabled = !isCI
-            isShrinkResources = !isCI
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = false
 
             proguardFiles(
@@ -108,10 +121,9 @@ android {
             signingConfig = signingConfigs.getByType(SigningType.TB_BETA)
 
             applicationIdSuffix = ".beta"
-            versionNameSuffix = "b0"
 
-            isMinifyEnabled = !isCI
-            isShrinkResources = !isCI
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = false
 
             matchingFallbacks += listOf("release")
@@ -130,8 +142,8 @@ android {
             applicationIdSuffix = ".daily"
             versionNameSuffix = "a1"
 
-            isMinifyEnabled = !isCI
-            isShrinkResources = !isCI
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = false
 
             matchingFallbacks += listOf("release")
@@ -143,20 +155,6 @@ android {
 
             // See https://bugzilla.mozilla.org/show_bug.cgi?id=1918151
             buildConfigField("String", "GLEAN_RELEASE_CHANNEL", "\"nightly\"")
-        }
-
-        debug {
-            applicationIdSuffix = ".debug"
-            versionNameSuffix = "-SNAPSHOT"
-
-            enableUnitTestCoverage = testCoverageEnabled
-            enableAndroidTestCoverage = testCoverageEnabled
-
-            isMinifyEnabled = false
-            isShrinkResources = false
-            isDebuggable = true
-
-            buildConfigField("String", "GLEAN_RELEASE_CHANNEL", "null")
         }
     }
 
