@@ -1,7 +1,6 @@
 package net.thunderbird.feature.account.avatar.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextTitleLarge
@@ -22,14 +21,10 @@ internal fun AvatarMonogram(
     size: AvatarSize,
     modifier: Modifier = Modifier,
 ) {
-    val displayMonogram = remember(monogram) {
-        monogram.take(2).uppercase()
-    }
-
     when (size) {
         AvatarSize.MEDIUM -> {
             TextTitleMedium(
-                text = displayMonogram,
+                text = monogram.uppercase(),
                 color = color,
                 modifier = modifier,
             )
@@ -37,7 +32,7 @@ internal fun AvatarMonogram(
 
         AvatarSize.LARGE -> {
             TextTitleLarge(
-                text = displayMonogram,
+                text = monogram.uppercase(),
                 color = color,
                 modifier = modifier,
             )
