@@ -11,9 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import app.k9mail.core.ui.compose.designsystem.atom.DividerHorizontal
-import app.k9mail.core.ui.compose.theme2.MainTheme
 import app.k9mail.legacy.ui.folder.FolderNameFormatter
 import kotlinx.collections.immutable.ImmutableList
+import net.thunderbird.core.ui.compose.theme2.MainTheme
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.DisplayFolder
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.DisplayUnifiedFolder
 

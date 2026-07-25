@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import app.k9mail.core.ui.compose.designsystem.atom.Surface
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextBodyLarge
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextBodyMedium
-import app.k9mail.core.ui.compose.theme2.MainTheme
+import net.thunderbird.core.ui.compose.theme2.MainTheme
 import net.thunderbird.feature.navigation.drawer.siderail.R
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.DisplayAccount
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.MailDisplayAccount

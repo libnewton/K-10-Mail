@@ -954,4 +954,5 @@ Du kannst diese Nachricht aufheben und sie als Backup für deinen geheimen Schl�
     <string name="animation_setting_off">Aus</string>
     <string name="animation_setting_follow_system">Systemstandard verwenden</string>
     <string name="legacy_account_menu_title">Altes Kontomenü verwenden</string>
+    <string name="legacy_account_menu_summary">Zeigt die Seitenleiste zur Kontoauswahl statt des Aufklapp-Menüs. Wird nach einem Neustart der App wirksam.</string>
 </resources>

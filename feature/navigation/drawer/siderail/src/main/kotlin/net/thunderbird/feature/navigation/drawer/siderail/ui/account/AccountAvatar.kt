@@ -10,9 +10,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.k9mail.core.ui.compose.designsystem.atom.Surface
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextLabelSmall
-import app.k9mail.core.ui.compose.theme2.ColorRoles
-import app.k9mail.core.ui.compose.theme2.MainTheme
 import app.k9mail.core.ui.compose.theme2.toColorRoles
+import net.thunderbird.core.ui.compose.theme2.ColorRoles
+import net.thunderbird.core.ui.compose.theme2.MainTheme
 import net.thunderbird.feature.account.avatar.Avatar
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.DisplayAccount
 import net.thunderbird.feature.navigation.drawer.siderail.domain.entity.MailDisplayAccount
@@ -42,6 +42,7 @@ internal fun AccountAvatar(
                 account.avatar
             }
         }
+
         is UnifiedDisplayAccount -> Avatar.Icon(name = "group")
     }
 

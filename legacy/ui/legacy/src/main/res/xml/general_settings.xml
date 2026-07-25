@@ -215,6 +215,7 @@
 
             <CheckBoxPreference
                 android:key="legacy_account_menu"
+                android:summary="@string/legacy_account_menu_summary"
                 android:title="@string/legacy_account_menu_title"
                 />
 

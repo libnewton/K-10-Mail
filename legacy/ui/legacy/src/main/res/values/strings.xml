@@ -716,6 +716,7 @@
     <string name="show_starred_count_title">Show starred count</string>
     <string name="expand_folders">Expand Folders</string>
     <string name="legacy_account_menu_title">Use legacy account menu</string>
+    <string name="legacy_account_menu_summary">Show the side rail account selector instead of the drop-down drawer. Takes effect after restarting the app.</string>
 
     <string name="integrated_inbox_title">Unified Inbox</string>
     <string name="integrated_inbox_detail">All messages in unified folders</string>

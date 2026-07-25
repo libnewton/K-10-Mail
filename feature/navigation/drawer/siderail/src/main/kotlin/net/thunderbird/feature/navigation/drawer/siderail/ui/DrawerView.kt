@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import app.k9mail.core.ui.compose.designsystem.molecule.PullToRefreshBox
 import net.thunderbird.core.ui.contract.mvi.observe
 import net.thunderbird.feature.navigation.drawer.siderail.FolderDrawerState
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun DrawerView(
@@ -21,14 +21,18 @@ internal fun DrawerView(
     val (state, dispatch) = viewModel.observe { effect ->
         when (effect) {
             is DrawerContract.Effect.OpenAccount -> openAccount(effect.accountId)
+
             is DrawerContract.Effect.OpenFolder -> openFolder(
                 effect.accountId,
                 effect.folderId,
             )
 
             DrawerContract.Effect.OpenUnifiedFolder -> openUnifiedFolder()
+
             is DrawerContract.Effect.OpenManageFolders -> openManageFolders()
+
             is DrawerContract.Effect.OpenSettings -> openSettings()
+
             DrawerContract.Effect.CloseDrawer -> closeDrawer()
         }
     }
