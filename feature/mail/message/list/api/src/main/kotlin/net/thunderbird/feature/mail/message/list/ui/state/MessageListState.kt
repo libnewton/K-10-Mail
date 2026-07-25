@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import net.thunderbird.feature.mail.message.list.preferences.MessageListPreferences
 
 /**
@@ -75,6 +76,26 @@ sealed interface MessageListState {
     }
 
     /**
+     * Creates a copy of the current state with an updated list of [messages], preserving all other
+     * properties.
+     *
+     * @param transform A lambda function that receives the current [ImmutableList] of [MessageItemUi]
+     * and returns a new, transformed list.
+     * @return A new [MessageListState] instance of the same type as the original, containing the
+     * transformed messages.
+     */
+    fun mapMessages(transform: (MessageItemUi) -> MessageItemUi): MessageListState {
+        val messages = messages.map(transform).toImmutableList()
+        return when (this) {
+            is LoadedMessages -> copy(messages = messages)
+            is LoadingMessages -> copy(messages = messages)
+            is SearchingMessages -> copy(messages = messages)
+            is SelectingMessages -> copy(messages = messages)
+            is WarmingUp -> copy(messages = messages)
+        }
+    }
+
+    /**
      * Represents the initial state of the message list screen before any messages are loaded.
      *
      * This state is used during the initial setup or "warm-up" phase, where the UI is being
@@ -85,15 +106,21 @@ sealed interface MessageListState {
         override val metadata: MessageListMetadata = MessageListMetadata(
             folder = null,
             swipeActions = persistentMapOf(),
-            selectedSortTypes = persistentMapOf(),
+            sortCriteriaPerAccount = persistentMapOf(),
             activeMessage = null,
             isActive = false,
         ),
         override val preferences: MessageListPreferences? = null,
         override val messages: ImmutableList<MessageItemUi> = persistentListOf(),
     ) : MessageListState {
+        /**
+         * Indicates whether the warming-up state has completed and is ready to transition to an active state.
+         *
+         * @return `true` when both the metadata is ready and user preferences have been loaded, signaling
+         * that the message list screen has completed its initialization phase and can proceed to display content.
+         */
         val isReady: Boolean
-            get() = metadata.swipeActions.isNotEmpty() && preferences != null && metadata.selectedSortTypes.isNotEmpty()
+            get() = metadata.isReady && preferences != null
     }
 
     /**

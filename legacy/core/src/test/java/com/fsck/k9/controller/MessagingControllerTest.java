@@ -39,10 +39,14 @@ import com.fsck.k9.notification.NotificationStrategy;
 import net.thunderbird.core.common.mail.Protocols;
 import net.thunderbird.core.logging.Logger;
 import net.thunderbird.core.outcome.Outcome;
+import net.thunderbird.feature.mail.message.list.LocalDeleteOperationDecider;
 import net.thunderbird.feature.mail.folder.api.OutboxFolderManager;
+import net.thunderbird.feature.mail.message.list.LocalMessageUidPrefixProvider;
 import net.thunderbird.feature.notification.api.NotificationManager;
 import net.thunderbird.feature.notification.testing.fake.FakeInAppOnlyNotification;
 import net.thunderbird.feature.notification.testing.fake.FakeNotificationManager;
+import net.thunderbird.legacy.core.StubLocalDeleteOperationDecider;
+import net.thunderbird.legacy.core.mailstore.folder.FakeLocalMessageUidPrefixProvider;
 import net.thunderbird.legacy.core.mailstore.folder.FakeOutboxFolderManager;
 import org.junit.After;
 import org.junit.Before;
@@ -131,6 +135,8 @@ public class MessagingControllerTest extends K9RobolectricTest {
         appContext = RuntimeEnvironment.getApplication();
 
         preferences = Preferences.getPreferences();
+        final LocalDeleteOperationDecider noOpLocalDeleteOperationDecider = new StubLocalDeleteOperationDecider();
+        final LocalMessageUidPrefixProvider fakeLocalMessageUidPrefixProvider = new FakeLocalMessageUidPrefixProvider();
         featureFlagProvider = key -> Disabled.INSTANCE;
 
         final NotificationManager notificationManager = new FakeNotificationManager(
@@ -151,7 +157,8 @@ public class MessagingControllerTest extends K9RobolectricTest {
             messageStoreManager,
             saveMessageDataCreator,
             specialLocalFoldersCreator,
-            new LocalDeleteOperationDecider(),
+            noOpLocalDeleteOperationDecider,
+            fakeLocalMessageUidPrefixProvider,
             Collections.<ControllerExtension>emptyList(),
             featureFlagProvider,
             syncLogger,

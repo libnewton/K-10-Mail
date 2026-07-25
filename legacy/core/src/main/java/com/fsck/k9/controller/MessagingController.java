@@ -38,6 +38,7 @@ import app.k9mail.legacy.message.controller.MessagingControllerRegistry;
 import app.k9mail.legacy.message.controller.MessagingListener;
 import app.k9mail.legacy.message.controller.SimpleMessagingListener;
 import com.fsck.k9.K9;
+import net.thunderbird.feature.mail.message.list.LocalMessageUidPrefixProvider;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.backend.BackendManager;
 import com.fsck.k9.backend.api.Backend;
@@ -88,6 +89,7 @@ import net.thunderbird.core.featureflag.FeatureFlagProvider;
 import net.thunderbird.core.featureflag.compat.FeatureFlagProviderCompat;
 import net.thunderbird.core.logging.Logger;
 import net.thunderbird.core.logging.legacy.Log;
+import net.thunderbird.feature.mail.message.list.LocalDeleteOperationDecider;
 import net.thunderbird.feature.mail.folder.api.OutboxFolderManager;
 import net.thunderbird.feature.mail.folder.api.OutboxFolderManagerKt;
 import net.thunderbird.feature.notification.api.NotificationManager;
@@ -137,6 +139,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
 
     private final Thread controllerThread;
 
+    private final LocalMessageUidPrefixProvider localMessageUidPrefixProvider;
     private final BlockingQueue<Command> queuedCommands = new PriorityBlockingQueue<>();
     private final Set<MessagingListener> listeners = new CopyOnWriteArraySet<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -169,6 +172,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
         SaveMessageDataCreator saveMessageDataCreator,
         SpecialLocalFoldersCreator specialLocalFoldersCreator,
         LocalDeleteOperationDecider localDeleteOperationDecider,
+        LocalMessageUidPrefixProvider localMessageUidPrefixProvider,
         List<ControllerExtension> controllerExtensions,
         FeatureFlagProvider featureFlagProvider,
         Logger syncDebugLogger,
@@ -185,6 +189,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
         this.saveMessageDataCreator = saveMessageDataCreator;
         this.specialLocalFoldersCreator = specialLocalFoldersCreator;
         this.localDeleteOperationDecider = localDeleteOperationDecider;
+        this.localMessageUidPrefixProvider = localMessageUidPrefixProvider;
         this.featureFlagProvider = featureFlagProvider;
         this.syncDebugLogger = syncDebugLogger;
         this.notificationSender = new NotificationSenderCompat(notificationManager);
@@ -203,7 +208,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
 
         initializeControllerExtensions(controllerExtensions);
 
-        draftOperations = new DraftOperations(this, messageStoreManager, saveMessageDataCreator);
+        draftOperations = new DraftOperations(this, messageStoreManager, saveMessageDataCreator, localMessageUidPrefixProvider);
         notificationOperations = new NotificationOperations(notificationController, preferences, messageStoreManager);
         archiveOperations = new ArchiveOperations(this, featureFlagProvider);
     }
@@ -852,7 +857,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
             return;
         }
 
-        if (!localMessage.getUid().startsWith(K9.LOCAL_UID_PREFIX)) {
+        if (!localMessage.getUid().startsWith(localMessageUidPrefixProvider.get())) {
             //FIXME: This should never happen. Throw in debug builds.
             return;
         }
@@ -1276,7 +1281,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
     private void loadMessageRemoteSynchronous(LegacyAccountDto account, long folderId, String messageServerId,
             MessagingListener listener, boolean loadPartialFromSearch) {
         try {
-            if (messageServerId.startsWith(K9.LOCAL_UID_PREFIX)) {
+            if (messageServerId.startsWith(localMessageUidPrefixProvider.get())) {
                 throw new IllegalArgumentException("Must not be called with a local UID");
             }
 
@@ -1729,7 +1734,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
     }
 
     public boolean isMoveCapable(MessageReference messageReference) {
-        return !messageReference.getUid().startsWith(K9.LOCAL_UID_PREFIX);
+        return !messageReference.getUid().startsWith(localMessageUidPrefixProvider.get());
     }
 
     public boolean isCopyCapable(MessageReference message) {
@@ -1850,7 +1855,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
             List<String> uids = new LinkedList<>();
             for (Message message : inMessages) {
                 String uid = message.getUid();
-                if (!uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+                if (!uid.startsWith(localMessageUidPrefixProvider.get())) {
                     uids.add(uid);
                 }
 
@@ -2057,7 +2062,7 @@ public class MessagingController implements MessagingControllerRegistry, Messagi
                 notificationController.removeNewMailNotification(account, message.makeMessageReference());
 
                 String uid = message.getUid();
-                if (uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+                if (uid.startsWith(localMessageUidPrefixProvider.get())) {
                     localOnlyMessages.add(message);
                 } else {
                     syncedMessages.add(message);

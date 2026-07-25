@@ -35,7 +35,6 @@
     <string name="choose_folder_title">Vali kaust</string>
     <string name="choose_folder_move_title">Teisalda…</string>
     <string name="choose_folder_copy_title">Kopeeri…</string>
-    <string name="actionbar_selected"><xliff:g id="selection_count">%d</xliff:g> valitud</string>
     <string name="send_action">Saada</string>
     <string name="empty_subject">Teema on tühi, ikkagi saatmiseks klõpsa uuesti</string>
     <string name="reply_action">Vasta</string>
@@ -114,7 +113,7 @@
     <string name="notification_action_delete_all">Kustuta kõik</string>
     <string name="notification_action_archive">Arhiveeri</string>
     <string name="notification_action_archive_all">Arhiveeri kõik</string>
-    <string name="notification_action_spam">Rämps</string>
+    <string name="notification_action_spam">Rämpspost</string>
     <string name="notification_certificate_error_public">Sertifikaadiviga</string>
     <string name="notification_certificate_error_title">Sertifikaadi viga kontol <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_certificate_error_text">Kontrolli serveri seadistusi</string>
@@ -124,7 +123,7 @@
     <string name="notification_notify_error_title">Viga teavitusel</string>
     <!--Body of an error notification that is displayed when creating a notification for a new message has failed-->
     <string name="notification_notify_error_text">Uue saabunud sõnumi kohta süsteemise teavituse loomisel tekkis viga. Üks võimalik põhjus on teavitusele määratud heli puudumine.\n\nAva teavituste seadistused.</string>
-    <string name="notification_bg_sync_ticker">Kontrollib e-kirju: <xliff:g id="account">%1$s</xliff:g>:<xliff:g id="folder">%2$s</xliff:g></string>
+    <string name="notification_bg_sync_ticker">E-kirjade kontroll: <xliff:g id="account">%1$s</xliff:g>:<xliff:g id="folder">%2$s</xliff:g></string>
     <string name="notification_bg_sync_title">Kontrollib e-kirju</string>
     <string name="notification_bg_send_ticker">Saadab e-kirja: <xliff:g id="account">%s</xliff:g></string>
     <string name="notification_bg_send_title">Saadab e-kirja</string>
@@ -313,7 +312,7 @@
     <string name="account_notify_contacts_mail_only_summary">Näita teateid ainult tuntud kontaktidelt saabunud kirjade kohta</string>
     <string name="account_settings_ignore_chat_messages_label">Eira vestlusega seotud kirju</string>
     <string name="account_settings_ignore_chat_messages_summary">Ära näita teavitusi kirjade puhul, mis on vestluse osa</string>
-    <string name="account_settings_mark_message_as_read_on_view_label">Pärast avamist märgi loetuks</string>
+    <string name="account_settings_mark_message_as_read_on_view_label">Avamisel märgi loetuks</string>
     <string name="account_settings_mark_message_as_read_on_view_summary">Vaatamiseks avamisel märgi kiri loetuks</string>
     <string name="account_settings_mark_message_as_read_on_delete_label">Pärast kustutamist märgi loetuks</string>
     <string name="account_settings_mark_message_as_read_on_delete_summary">Kustutamisel märgi kiri loetuks</string>
@@ -344,7 +343,7 @@
     <string name="account_settings_upload_sent_messages_label">Laadi üles saadetud kirjad</string>
     <string name="account_settings_upload_sent_messages_summary">Pärast saatmist tõsta kirjad saadetud kirjade kausta </string>
     <string name="account_settings_general_title">Üldseadistused</string>
-    <string name="account_settings_reading_mail">Meili lugemine</string>
+    <string name="account_settings_reading_mail">E-kirjade lugemine</string>
     <string name="account_settings_sync">Meili toomine</string>
     <string name="account_settings_folders">Kaustad</string>
     <string name="account_settings_quote_prefix_label">Tsiteeritud teksti eesliide</string>
@@ -469,7 +468,7 @@
     <string name="sort_unread_last">Loetud kirjad esimesena</string>
     <string name="sort_attach_first">Manustega kirjad esimestena</string>
     <string name="sort_unattached_first">Manusteta kirjad esimestena</string>
-    <string name="sort_by">Sorteeri kasutades…</string>
+    <string name="sort_by">Järjesta…</string>
     <string name="sort_by_date">Kuupäev</string>
     <string name="sort_by_arrival">Saabumine</string>
     <string name="sort_by_subject">Teema</string>
@@ -519,7 +518,6 @@
     <string name="account_setup_push_limit_500">500 kausta</string>
     <string name="account_setup_push_limit_1000">1000 kausta</string>
     <string name="animations_title">Animatsioon</string>
-    <string name="animations_summary">Kasuta erinevaid visuaalseid efekte</string>
     <string name="show_unified_inbox_title">Näita koondsisendkausta</string>
     <string name="show_starred_count_title">Näita tärniga tähistatud kirjade arvu</string>
     <string name="integrated_inbox_title">Koondsisendkaust</string>
@@ -621,7 +619,7 @@
     <string name="account_settings_remote_search_num_results_entries_250">250</string>
     <string name="account_settings_remote_search_num_results_entries_500">500</string>
     <string name="account_settings_remote_search_num_results_entries_1000">1000</string>
-    <string name="account_settings_remote_search_num_label">Serverist otsingu limiit</string>
+    <string name="account_settings_remote_search_num_label">Järgi serveri otsingupiirangut</string>
     <string name="remote_search_sending_query">Saadab serverile päringut</string>
     <plurals name="remote_search_downloading">
         <item quantity="one">Toon %d tuelmuse</item>
@@ -731,7 +729,6 @@
     <string name="crypto_msg_encrypted_insecure">aga krüptimise meetodeid ei loeta turvaliseks</string>
     <string name="locked_attach_unlock">Ava</string>
     <string name="locked_attach_unencrypted">See osa on krüptimata ja võib olla ebaturvaline.</string>
-    <string name="locked_attach_title">Krüptimata manus</string>
     <string name="message_progress_text">Laeb…</string>
     <string name="messageview_decrypt_cancelled">Dekrüptimine katkestati.</string>
     <string name="messageview_decrypt_retry">Korduskatse</string>
@@ -805,25 +802,15 @@ Palun jäta see kiri alles ning kasuta seda muu hulgas oma krüptovõtme varunda
     <string name="push_info_disable_push_text">Kui sul pole vaja ülikiiret infot saabunud kirjade kohta, siis lülita tõuketeenused välja ning lase K-9 Mail\'il kasutada tavapärast uute kirjade kontrollimist. Sellisel juhul vaatab K-9 Mail seadistatud ajavahemiku järel serverist uusi kirju ja mainitud püsiteavitust pole vaja.</string>
     <string name="push_info_disable_push_action">Ära kasuta tõuketeenuseid</string>
     <!--Name of the swipe action to select a message. Try to keep it short.-->
-    <string name="swipe_action_select">Vali</string>
     <!--Name of the swipe action to deselect a message. Try to keep it short.-->
-    <string name="swipe_action_deselect">Tühista valik</string>
     <!--Name of the swipe action to mark a message as read. Try to keep it short.-->
-    <string name="swipe_action_mark_as_read">Märgi loetuks</string>
     <!--Name of the swipe action to mark a message as unread. Try to keep it short.-->
-    <string name="swipe_action_mark_as_unread">Märgi mitteloetuks</string>
     <!--Name of the swipe action to add the star to a message. Try to keep it short.-->
-    <string name="swipe_action_add_star">Lisa tärn</string>
     <!--Name of the swipe action to remove the star from a message. Try to keep it short.-->
-    <string name="swipe_action_remove_star">Eemalda tärn</string>
     <!--Name of the swipe action to archive a message. Try to keep it short.-->
-    <string name="swipe_action_archive">Arhiveeri</string>
     <!--Name of the swipe action to delete a message. Try to keep it short.-->
-    <string name="swipe_action_delete">Kustuta</string>
     <!--Name of the swipe action to move a message to the Spam folder. Try to keep it short.-->
-    <string name="swipe_action_spam">Rämps</string>
     <!--Name of the swipe action to move a message. The ellipsis (…) indicates that there is another step (selecting a folder) before the action is performed. Try to keep it short.-->
-    <string name="swipe_action_move">Teisalda…</string>
     <!--Name of setting to configure whether to show a "compose" floating action button on top of the message list-->
     <string name="general_settings_show_compose_button_title">Näita kirja koostamise nuppu ujuvana kirjade loendi kohal</string>
     <!--Displayed in the toolbar when there was an error loading the message list, e.g. because the folder no longer exists.-->
@@ -900,8 +887,6 @@ Palun jäta see kiri alles ning kasuta seda muu hulgas oma krüptovõtme varunda
     <string name="debug_enable_sync_debug_logging_title">Luba sünkroniseerimisandmete logimine</string>
     <string name="debug_sync_export_logs_title">Ekspordi sünkroniseerimislogid</string>
     <string name="debug_enable_sync_debug_logging_summary">Logi diagnostilised sünkroniseerimisandmed viimase 24 tunni kohta</string>
-    <string name="swipe_action_archive_folder_not_set">Määra arhiivikaust</string>
-    <string name="swipe_action_change_swipe_gestures">Muuda \nViiped</string>
     <string name="archiving_not_available_for_this_account">Selle kasutajakonto jaoks pole arhiveerimine saadaval.</string>
     <string name="debug_open_secret_debug_screen">Ava salajane veaotsingu vaade</string>
     <string name="debug_invalidate_access_token">Katse: tühista ligipääsu tunnusluba</string>
@@ -929,4 +914,45 @@ Palun jäta see kiri alles ning kasuta seda muu hulgas oma krüptovõtme varunda
     <string name="global_settings_messageview_body_content_type_text_plain">Vormindamata tekst (text/plain)</string>
     <string name="debug_feature_flags">VEAOTSING: funktsionaalsuste võtmed</string>
     <string name="print_message_action">Prindi</string>
+    <string name="global_settings_splitview_when_unfolded">Kui seade on lahtivolditud</string>
+    <string name="general_settings_message_list_date_time_format_title">Kuupäeva ja kellaaja vorming</string>
+    <string name="general_settings_message_list_date_time_format_contextual">Kontekstuaalne</string>
+    <string name="general_settings_message_list_date_time_format_full">Täisvaates</string>
+    <string name="sort_by_then_by">Ja siis järjesta…</string>
+    <plurals name="message_view_attachment_summary">
+        <item quantity="one"><xliff:g id="count">%1$d</xliff:g> Manus (<xliff:g id="size">%2$s</xliff:g>)</item>
+        <item quantity="other"><xliff:g id="count">%1$d</xliff:g> Manused (<xliff:g id="size">%2$s</xliff:g>)</item>
+    </plurals>
+    <string name="message_view_single_attachment_summary"><xliff:g id="name">%1$s</xliff:g> (<xliff:g id="size">%2$s</xliff:g>)</string>
+    <string name="message_view_attachments_view_all">Vaata kõiki</string>
+    <string name="message_view_attachments_view">Vaata</string>
+    <string name="message_view_attachments_title">Manused</string>
+    <string name="message_view_attachments_save_all">Salvesta kõik</string>
+    <string name="general_settings_message_list_date_time_format_iso">ISO</string>
+    <string name="no_network_message_will_be_sent_later_toast">Võrguühendus puudub. Kiri saadetakse selle taastumisel</string>
+    <string name="notification_actions_settings_title">Toimingud teavitustes</string>
+    <string name="notification_actions_settings_summary">Saad valida tegevused, mis kuvatakse e-kirjade teavitustes</string>
+    <string name="changelog_latest_label_text">VIIMASED</string>
+    <string name="changelog_type_new_text">UUS</string>
+    <string name="changelog_type_changed_text">MUUTUNUD</string>
+    <string name="changelog_type_fixed_text">PARANDATUD</string>
+    <string name="notification_summary_delete_title">Näita mitme kirja teavituses kustutusnuppu</string>
+    <string name="notification_summary_delete_summary">Lisab kustutusnupu teavitustele, mis ühendavad teabe mitme kirja kohta</string>
+    <string name="accessibility_move_item_down">Tõsta <xliff:g id="item">%1$s</xliff:g> allapoole</string>
+    <string name="accessibility_move_item_up">Tõsta <xliff:g id="item">%1$s</xliff:g> ülespoole</string>
+    <string name="accessibility_move_down">Tõsta allapoole</string>
+    <string name="accessibility_move_up">Tõsta ülespoole</string>
+    <string name="notification_actions_hidden_state">Pole teavituses näidatud</string>
+    <string name="notification_actions_shown_state">On teavituses näidatud</string>
+    <string name="notification_actions_cutoff_state">Sellest joonest ülalpool olev sisu on näidatud teavituses</string>
+    <string name="notification_actions_cutoff_description">Näidatud tegevuste vaheltlõige</string>
+    <string name="notification_actions_settings_description">Muuda teavituste toimingute järjestust.</string>
+    <string name="accessibility_move_cutoff_up">Tõsta näidatud tegevuste vaheltlõige ülespoole</string>
+    <string name="accessibility_move_cutoff_down">Tõsta näidatud tegevuste vaheltlõige allapoole</string>
+    <string name="notification_action_star">Märgi tähega</string>
+    <string name="notification_show_contact_picture_title">Näita teavitustes kontaktide pilte</string>
+    <string name="notification_show_contact_picture_summary">Näita uute kirjade teavitustes kontaktide tunnuspilte</string>
+    <string name="animation_setting_on">Sisselülitatud</string>
+    <string name="animation_setting_off">Väljalülitatud</string>
+    <string name="animation_setting_follow_system">Kasuta süsteemi vaikimisi eelistust</string>
 </resources>

@@ -1,11 +1,11 @@
 package net.thunderbird.feature.mail.message.list.internal.ui.state.machine
 
-import androidx.compose.ui.graphics.Color
 import app.cash.turbine.test
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import assertk.assertions.prop
@@ -13,12 +13,7 @@ import dev.mokkery.spy
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import kotlin.test.Test
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableSet
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.thunderbird.core.common.action.SwipeAction
@@ -26,28 +21,20 @@ import net.thunderbird.core.common.action.SwipeActions
 import net.thunderbird.core.preference.display.visualSettings.message.list.UiDensity
 import net.thunderbird.feature.account.AccountId
 import net.thunderbird.feature.account.AccountIdFactory
-import net.thunderbird.feature.mail.message.list.preferences.ActionRequiringUserConfirmation
-import net.thunderbird.feature.mail.message.list.preferences.MessageListDateTimeFormat
+import net.thunderbird.feature.mail.message.list.domain.model.SortCriteria
+import net.thunderbird.feature.mail.message.list.domain.model.SortType
 import net.thunderbird.feature.mail.message.list.preferences.MessageListPreferences
+import net.thunderbird.feature.mail.message.list.ui.event.FolderEvent
 import net.thunderbird.feature.mail.message.list.ui.event.MessageItemEvent
 import net.thunderbird.feature.mail.message.list.ui.event.MessageListEvent
 import net.thunderbird.feature.mail.message.list.ui.event.MessageListSearchEvent
-import net.thunderbird.feature.mail.message.list.ui.state.Account
-import net.thunderbird.feature.mail.message.list.ui.state.EmailIdentity
-import net.thunderbird.feature.mail.message.list.ui.state.MessageItemAttachment
-import net.thunderbird.feature.mail.message.list.ui.state.MessageItemUi
-import net.thunderbird.feature.mail.message.list.ui.state.MessageItemUi.State
+import net.thunderbird.feature.mail.message.list.ui.state.Folder
 import net.thunderbird.feature.mail.message.list.ui.state.MessageListMetadata
 import net.thunderbird.feature.mail.message.list.ui.state.MessageListState
-import net.thunderbird.feature.mail.message.list.ui.state.SortType
 
 @Suppress("MaxLineLength")
 @OptIn(ExperimentalCoroutinesApi::class)
-class MessageListStateMachineTest {
-    private fun TestScope.createStateMachine(dispatch: (MessageListEvent) -> Unit = {}) = MessageListStateMachine(
-        scope = this,
-        dispatch = dispatch,
-    )
+class MessageListStateMachineTest : BaseMessageListStateMachineTest() {
 
     // region [WarmingUp state]
     @Test
@@ -109,7 +96,7 @@ class MessageListStateMachineTest {
             advanceUntilIdle()
 
             // Act
-            stateMachine.process(event = MessageListEvent.SortTypesLoaded(emptyMap()))
+            stateMachine.process(event = MessageListEvent.SortCriteriaLoaded(emptyMap()))
 
             // Assert
             stateMachine.currentState.test {
@@ -142,10 +129,12 @@ class MessageListStateMachineTest {
         // Arrange
         val stateMachine = createStateMachine()
         val preferences = createMessageListPreferences()
-        val sortTypes = mapOf<AccountId?, SortType>(null to SortType.DateDesc)
-        val swipeActions = mapOf<AccountId, SwipeActions>(
+        val sortCriteriaPerAccount = mapOf<AccountId?, SortCriteria>(null to SortCriteria(SortType.DateDesc))
+        val swipeActions = mapOf(
             AccountIdFactory.create() to SwipeActions(SwipeAction.None, SwipeAction.None),
         )
+        val expectedFolderId = "this-is-my-folder"
+        val folder = createFolder(id = expectedFolderId)
         advanceUntilIdle()
 
         // Act
@@ -158,11 +147,15 @@ class MessageListStateMachineTest {
             stateMachine.process(MessageListEvent.UpdatePreferences(preferences))
             assertThat(awaitItem()).isInstanceOf<MessageListState.WarmingUp>()
 
-            stateMachine.process(MessageListEvent.SortTypesLoaded(sortTypes))
+            stateMachine.process(MessageListEvent.SortCriteriaLoaded(sortCriteriaPerAccount))
             assertThat(awaitItem()).isInstanceOf<MessageListState.WarmingUp>()
 
             stateMachine.process(MessageListEvent.SwipeActionsLoaded(swipeActions))
             assertThat(awaitItem()).isInstanceOf<MessageListState.WarmingUp>()
+
+            stateMachine.process(FolderEvent.FolderLoaded(folder = folder))
+            assertThat(awaitItem()).isInstanceOf<MessageListState.WarmingUp>()
+
             stateMachine.process(event = MessageListEvent.AllConfigsReady)
             assertThat(awaitItem())
                 .isInstanceOf<MessageListState.LoadingMessages>()
@@ -171,8 +164,11 @@ class MessageListStateMachineTest {
                     prop(MessageListState.LoadingMessages::progress).isEqualTo(0f)
                     transform { it.metadata }.all {
                         prop(MessageListMetadata::swipeActions).isEqualTo(swipeActions)
-                        prop(MessageListMetadata::selectedSortTypes).isEqualTo(sortTypes)
-                        prop(MessageListMetadata::folder).isNull()
+                        prop(MessageListMetadata::sortCriteriaPerAccount).isEqualTo(sortCriteriaPerAccount)
+                        prop(MessageListMetadata::folder)
+                            .isNotNull()
+                            .prop(Folder::id)
+                            .isEqualTo(expectedFolderId)
                     }
                 }
 
@@ -262,13 +258,14 @@ class MessageListStateMachineTest {
             val preferences: MessageListPreferences = createMessageListPreferences(
                 density = UiDensity.Compact,
             )
-            val sortTypes: Map<AccountId?, SortType> = mapOf(accountId to SortType.DateDesc)
+            val sortCriteriaPerAccount: Map<AccountId?, SortCriteria> =
+                mapOf(accountId to SortCriteria(SortType.DateDesc))
             val swipeActions: Map<AccountId, SwipeActions> = mapOf(
                 accountId to SwipeActions(SwipeAction.None, SwipeAction.None),
             )
             val stateMachine = createStateMachineOnLoadingState(
                 preferences = preferences,
-                sortTypes = sortTypes,
+                sortCriteriaPerAccount = sortCriteriaPerAccount,
                 swipeActions = swipeActions,
             )
             advanceUntilIdle()
@@ -293,10 +290,10 @@ class MessageListStateMachineTest {
                         prop(MessageListState.LoadedMessages::preferences).isEqualTo(preferences)
                         prop(MessageListState.LoadedMessages::messages).isEqualTo(messages)
                         transform { it.metadata }.all {
-                            prop(MessageListMetadata::folder).isNull()
+                            prop(MessageListMetadata::folder).isNotNull()
                             prop(MessageListMetadata::activeMessage).isNull()
                             prop(MessageListMetadata::swipeActions).isEqualTo(swipeActions)
-                            prop(MessageListMetadata::selectedSortTypes).isEqualTo(sortTypes)
+                            prop(MessageListMetadata::sortCriteriaPerAccount).isEqualTo(sortCriteriaPerAccount)
                         }
                     }
             }
@@ -545,179 +542,4 @@ class MessageListStateMachineTest {
             }
         }
     // endregion [SearchingMessages state]
-
-    private suspend fun TestScope.createStateMachineOnLoadingState(
-        preferences: MessageListPreferences = createMessageListPreferences(),
-        sortTypes: Map<AccountId?, SortType> = mapOf(null to SortType.DateDesc),
-        swipeActions: Map<AccountId, SwipeActions> = mapOf(
-            AccountIdFactory.create() to SwipeActions(SwipeAction.None, SwipeAction.None),
-        ),
-    ): MessageListStateMachine {
-        val stateMachine = createStateMachine()
-        advanceUntilIdle()
-        stateMachine.process(event = MessageListEvent.UpdatePreferences(preferences))
-        stateMachine.process(event = MessageListEvent.SortTypesLoaded(sortTypes))
-        stateMachine.process(event = MessageListEvent.SwipeActionsLoaded(swipeActions))
-        stateMachine.process(event = MessageListEvent.AllConfigsReady)
-        advanceUntilIdle()
-        return stateMachine
-    }
-
-    private suspend fun TestScope.createStateMachineOnLoadedState(
-        messages: List<MessageItemUi>,
-        preferences: MessageListPreferences = createMessageListPreferences(),
-        sortTypes: Map<AccountId?, SortType> = mapOf(null to SortType.DateDesc),
-        swipeActions: Map<AccountId, SwipeActions> = mapOf(
-            AccountIdFactory.create() to SwipeActions(SwipeAction.None, SwipeAction.None),
-        ),
-    ): MessageListStateMachine {
-        val stateMachine = createStateMachine()
-        advanceUntilIdle()
-        stateMachine.process(event = MessageListEvent.UpdatePreferences(preferences))
-        stateMachine.process(event = MessageListEvent.SortTypesLoaded(sortTypes))
-        stateMachine.process(event = MessageListEvent.SwipeActionsLoaded(swipeActions))
-        stateMachine.process(event = MessageListEvent.AllConfigsReady)
-        stateMachine.process(event = MessageListEvent.UpdateLoadingProgress(progress = 1f))
-        stateMachine.process(event = MessageListEvent.MessagesLoaded(messages))
-        advanceUntilIdle()
-        return stateMachine
-    }
-
-    private suspend fun TestScope.createStateMachineOnSearchingMessages(
-        messages: List<MessageItemUi>,
-        preferences: MessageListPreferences = createMessageListPreferences(),
-        sortTypes: Map<AccountId?, SortType> = mapOf(null to SortType.DateDesc),
-        swipeActions: Map<AccountId, SwipeActions> = mapOf(
-            AccountIdFactory.create() to SwipeActions(SwipeAction.None, SwipeAction.None),
-        ),
-    ): MessageListStateMachine {
-        val stateMachine = createStateMachine()
-        advanceUntilIdle()
-        stateMachine.process(MessageListEvent.UpdatePreferences(preferences))
-        stateMachine.process(MessageListEvent.SortTypesLoaded(sortTypes))
-        stateMachine.process(MessageListEvent.SwipeActionsLoaded(swipeActions))
-        stateMachine.process(event = MessageListEvent.AllConfigsReady)
-        stateMachine.process(event = MessageListEvent.UpdateLoadingProgress(progress = 1f))
-        stateMachine.process(event = MessageListEvent.MessagesLoaded(messages))
-        stateMachine.process(event = MessageListSearchEvent.EnterSearchMode)
-        advanceUntilIdle()
-        return stateMachine
-    }
-
-    private suspend fun TestScope.createStateMachineOnSelectingMessages(
-        messages: List<MessageItemUi>,
-        preferences: MessageListPreferences = createMessageListPreferences(),
-        sortTypes: Map<AccountId?, SortType> = mapOf(null to SortType.DateDesc),
-        swipeActions: Map<AccountId, SwipeActions> = mapOf(
-            AccountIdFactory.create() to SwipeActions(SwipeAction.None, SwipeAction.None),
-        ),
-    ): MessageListStateMachine {
-        val stateMachine = createStateMachine()
-        advanceUntilIdle()
-        stateMachine.process(event = MessageListEvent.UpdatePreferences(preferences))
-        stateMachine.process(event = MessageListEvent.SortTypesLoaded(sortTypes))
-        stateMachine.process(event = MessageListEvent.SwipeActionsLoaded(swipeActions))
-        stateMachine.process(event = MessageListEvent.AllConfigsReady)
-        stateMachine.process(event = MessageListEvent.UpdateLoadingProgress(progress = 1f))
-        stateMachine.process(event = MessageListEvent.MessagesLoaded(messages))
-        stateMachine.process(event = MessageListEvent.EnterSelectionMode)
-        advanceUntilIdle()
-        return stateMachine
-    }
 }
-
-private fun createMessageListPreferences(
-    density: UiDensity = UiDensity.Default,
-    groupConversations: Boolean = false,
-    showCorrespondentNames: Boolean = false,
-    showMessageAvatar: Boolean = false,
-    showFavouriteButton: Boolean = false,
-    senderAboveSubject: Boolean = false,
-    excerptLines: Int = 1,
-    dateTimeFormat: MessageListDateTimeFormat = MessageListDateTimeFormat.Auto,
-    useVolumeKeyNavigation: Boolean = false,
-    serverSearchLimit: Int = 0,
-    actionRequiringUserConfirmation: ImmutableSet<ActionRequiringUserConfirmation> = persistentSetOf(),
-    colorizeBackgroundWhenRead: Boolean = false,
-) = MessageListPreferences(
-    density = density,
-    groupConversations = groupConversations,
-    showCorrespondentNames = showCorrespondentNames,
-    showMessageAvatar = showMessageAvatar,
-    showFavouriteButton = showFavouriteButton,
-    senderAboveSubject = senderAboveSubject,
-    excerptLines = excerptLines,
-    dateTimeFormat = dateTimeFormat,
-    useVolumeKeyNavigation = useVolumeKeyNavigation,
-    serverSearchLimit = serverSearchLimit,
-    actionRequiringUserConfirmation = actionRequiringUserConfirmation,
-    colorizeBackgroundWhenRead = colorizeBackgroundWhenRead,
-)
-
-private fun createMessageUiItemList(
-    size: Int,
-    accountId: AccountId = AccountIdFactory.create(),
-    builder: (index: Int) -> MessageItemUi = { index ->
-        when {
-            index % 6 == 0 -> createMessageUiItem(
-                state = State.Unread,
-                id = "id$index",
-                accountId = accountId,
-            )
-
-            index % 4 == 0 -> createMessageUiItem(
-                state = State.Read,
-                id = "id$index",
-                accountId = accountId,
-            )
-
-            index % 2 == 0 -> createMessageUiItem(
-                state = State.New,
-                id = "id$index",
-                accountId = accountId,
-            )
-
-            else -> createMessageUiItem(
-                state = State.Active,
-                id = "id$index",
-                accountId = accountId,
-            )
-        }
-    },
-): List<MessageItemUi> = List(size) { builder(it) }
-
-private fun createMessageUiItem(
-    state: State,
-    id: String,
-    folderId: String = "mock",
-    accountId: AccountId = AccountIdFactory.create(),
-    senders: ImmutableList<EmailIdentity> = persistentListOf(),
-    recipients: ImmutableList<EmailIdentity> = persistentListOf(),
-    subject: String = "mock subject",
-    excerpt: String = "mock excerpt",
-    formattedReceivedAt: String = "Jan 2026",
-    attachments: ImmutableList<MessageItemAttachment> = persistentListOf(),
-    starred: Boolean = false,
-    encrypted: Boolean = false,
-    answered: Boolean = false,
-    forwarded: Boolean = false,
-    selected: Boolean = false,
-    conversations: ImmutableList<MessageItemUi> = persistentListOf(),
-): MessageItemUi = MessageItemUi(
-    state = state,
-    id = id,
-    folderId = folderId,
-    account = Account(id = accountId, color = Color.Unspecified),
-    senders = senders,
-    recipients = recipients,
-    subject = subject,
-    excerpt = excerpt,
-    formattedReceivedAt = formattedReceivedAt,
-    attachments = attachments,
-    starred = starred,
-    encrypted = encrypted,
-    answered = answered,
-    forwarded = forwarded,
-    selected = selected,
-    conversations = conversations,
-)

@@ -3,9 +3,8 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "net.thunderbird.core.file"
-        withHostTest {}
     }
     sourceSets {
         commonMain.dependencies {

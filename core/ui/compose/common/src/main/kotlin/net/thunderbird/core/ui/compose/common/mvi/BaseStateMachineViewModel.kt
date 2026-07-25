@@ -2,7 +2,6 @@ package net.thunderbird.core.ui.compose.common.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.k9mail.core.ui.compose.common.mvi.UnidirectionalViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +10,7 @@ import kotlinx.coroutines.launch
 import net.thunderbird.core.common.state.StateMachine
 import net.thunderbird.core.common.state.sideeffect.StateSideEffectHandler
 import net.thunderbird.core.logging.Logger
+import net.thunderbird.core.ui.contract.mvi.UnidirectionalViewModel
 
 /**
  * An abstract base ViewModel that implements [UnidirectionalViewModel] and provides a
@@ -31,9 +31,9 @@ import net.thunderbird.core.logging.Logger
  * @param sideEffectHandlersFactories A list of factories for creating [StateSideEffectHandler]s.
  *  These handlers can be used to trigger side effects in response to state transitions.
  */
-abstract class BaseStateMachineViewModel<TState : Any, TEvent : Any, TUiSideEffect>(
+abstract class BaseStateMachineViewModel<TState : Any, TEvent : Any, TUiSideEffect : Any>(
     protected val logger: Logger,
-    sideEffectHandlersFactories: List<StateSideEffectHandler.Factory<TState, TEvent>> = emptyList(),
+    sideEffectHandlersFactories: List<StateSideEffectHandler.Factory<TState, TEvent, TUiSideEffect>> = emptyList(),
 ) :
     ViewModel(),
     UnidirectionalViewModel<TState, TEvent, TUiSideEffect> {
@@ -50,7 +50,13 @@ abstract class BaseStateMachineViewModel<TState : Any, TEvent : Any, TUiSideEffe
 
     private val _effect = MutableSharedFlow<TUiSideEffect>()
     override val effect: SharedFlow<TUiSideEffect> = _effect.asSharedFlow()
-    private val sideEffectHandlers = sideEffectHandlersFactories.map { it.create(viewModelScope, ::event) }
+    private val sideEffectHandlers = sideEffectHandlersFactories.map {
+        it.create(
+            scope = viewModelScope,
+            dispatch = ::event,
+            dispatchUiEffect = ::emitEffect,
+        )
+    }
 
     private val handledOneTimeEvents = mutableSetOf<TEvent>()
 
@@ -104,11 +110,22 @@ abstract class BaseStateMachineViewModel<TState : Any, TEvent : Any, TUiSideEffe
             val newState = stateMachine.process(event)
             if (newState != currentState) {
                 logger.verbose { "event(${event::class.simpleName}): state update." }
-                sideEffectHandlers
-                    .filter { it.accept(event, newState) }
-                    .forEach { it.handle(event, oldState = currentState, newState) }
+            } else {
+                onEventWithoutStateModification(event, currentState)
             }
-            stateMachine.process(event)
+
+            sideEffectHandlers.forEach { it.handle(event, oldState = currentState, newState = newState) }
         }
+    }
+
+    /**
+     * Processes an event without making changes to the state machine's state. Useful for
+     * events without state transition.
+     *
+     * @param event The [TEvent] to be processed.
+     * @param currentState The current state of the [StateMachine].
+     */
+    protected open fun onEventWithoutStateModification(event: TEvent, currentState: TState) {
+        // Override this method to handle events that doesn't trigger state changes.
     }
 }

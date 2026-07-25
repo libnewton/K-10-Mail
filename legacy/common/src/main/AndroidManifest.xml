@@ -183,6 +183,11 @@
             />
 
         <activity
+            android:name="com.fsck.k9.ui.settings.notificationactions.NotificationActionsSettingsActivity"
+            android:label="@string/notification_actions_settings_title"
+            />
+
+        <activity
             android:name="com.fsck.k9.ui.settings.account.AccountSettingsActivity"
             android:label="@string/account_settings_title_fmt"
             />
@@ -192,10 +197,6 @@
             android:label="@string/show_headers_action"
             />
 
-        <activity
-            android:name="com.fsck.k9.ui.changelog.RecentChangesActivity"
-            android:label="@string/changelog_recent_changes_title"
-            />
 
         <activity
             android:name="com.fsck.k9.ui.push.PushInfoActivity"
