@@ -1,0 +1,63 @@
+---
+name: Build - Signed K-10 APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'k10-*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-signed:
+    name: Build signed release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v5
+
+      - name: Setup Gradle environment
+        uses: ./.github/actions/setup-gradle
+
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.K9_RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.K9_RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.K9_RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.K9_RELEASE_KEY_PASSWORD }}
+        run: |
+          mkdir -p .signing
+          echo "$KEYSTORE_BASE64" | base64 -d > .signing/k10-release.jks
+          cat > .signing/k9.release.signing.properties <<EOF
+          k9.release.storeFile=${{ github.workspace }}/.signing/k10-release.jks
+          k9.release.storePassword=$STORE_PASSWORD
+          k9.release.keyAlias=$KEY_ALIAS
+          k9.release.keyPassword=$KEY_PASSWORD
+          EOF
+
+      # No -Pci=true here: `ci` disables minification and resource shrinking
+      # (app-k9mail/build.gradle.kts), which triples the APK size.
+      - name: Build signed release APK
+        run: ./gradlew :app-k9mail:assembleFossRelease
+
+      - name: Fail if the APK came out unsigned
+        run: |
+          if ls app-k9mail/build/outputs/apk/foss/release/*-unsigned.apk >/dev/null 2>&1; then
+            echo "APK is unsigned - the signing properties were not picked up." >&2
+            exit 1
+          fi
+
+      - name: Remove signing key
+        if: always()
+        run: rm -rf .signing
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: k10-mail-foss-release
+          path: app-k9mail/build/outputs/apk/foss/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
