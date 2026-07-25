@@ -119,6 +119,7 @@ include(
     ":feature:navigation:drawer:api",
     ":feature:navigation:drawer:dropdown",
     ":feature:navigation:drawer:siderail",
+    ":feature:changelog:api",
 )
 
 include(
@@ -162,6 +163,7 @@ include(
     ":core:common",
     ":core:configstore:api",
     ":core:configstore:impl-backend",
+    ":core:configstore:testing",
     ":core:featureflag",
     ":core:logging:api",
     ":core:logging:config",
@@ -190,24 +192,26 @@ include(
 )
 
 include(
+    ":core:ui:common",
+    ":core:ui:contract",
     ":core:ui:setting:api",
     ":core:ui:setting:component",
     ":core:ui:setting:impl-dialog",
+    ":core:ui:testing",
 )
 
 include(
     ":core:ui:account",
+    ":core:ui:animation:manager",
     ":core:ui:compose:common",
     ":core:ui:compose:designsystem",
-    ":core:ui:compose:navigation",
     ":core:ui:compose:testing",
-    ":core:ui:compose:theme2:common",
-    ":core:ui:compose:theme2:k9mail",
-    ":core:ui:compose:theme2:thunderbird",
+    ":core:ui:compose:theme2",
     ":core:ui:legacy:designsystem",
     ":core:ui:legacy:theme2:common",
     ":core:ui:legacy:theme2:k9mail",
     ":core:ui:legacy:theme2:thunderbird",
+    ":core:ui:navigation",
     ":core:ui:theme:api",
     ":core:ui:theme:manager",
 )
@@ -255,6 +259,7 @@ include(
     ":cli:html-cleaner-cli",
     ":cli:resource-mover-cli",
     ":cli:translation-cli",
+    ":cli:weblate-cli",
 )
 
 include(
@@ -270,6 +275,13 @@ include(
     ":feature:debug-settings",
 )
 
+include(
+    ":feature:thundermail:api",
+    ":feature:thundermail:internal:common",
+    ":feature:thundermail:thunderbird",
+    ":feature:thundermail:k9mail",
+)
+
 check(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     """
         Java 21+ is required to build Thunderbird for Android.
@@ -281,3 +293,4 @@ check(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
         https://developer.android.com/build/jdks#jdk-config-in-studio
     """.trimIndent()
 }
+include(":feature:changelog:internal")

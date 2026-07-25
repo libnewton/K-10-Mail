@@ -10,6 +10,7 @@ dependencies {
     api(projects.core.mail.mailserver)
     api(projects.core.android.common)
     api(projects.core.android.account)
+    api(projects.core.common)
     api(projects.core.preference.impl)
     api(projects.core.android.logging)
     api(projects.core.logging.implFile)
@@ -36,7 +37,6 @@ dependencies {
 
     implementation(libs.okio)
     implementation(libs.commons.io)
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.localbroadcastmanager)
@@ -50,8 +50,8 @@ dependencies {
     implementation(projects.feature.mail.message.list.api)
     implementation(projects.feature.mail.message.reader.api)
 
-    testApi(projects.core.testing)
-    testApi(projects.core.android.testing)
+    testImplementation(projects.core.testing)
+    testImplementation(projects.core.android.testing)
     testImplementation(projects.core.logging.testing)
     testImplementation(projects.feature.telemetry.noop)
     testImplementation(projects.mail.testing)
@@ -59,11 +59,12 @@ dependencies {
     testImplementation(projects.mail.protocols.smtp)
     testImplementation(projects.legacy.storage)
     testImplementation(projects.core.android.common)
-    testImplementation(libs.kotlin.test)
+
     testImplementation(libs.kotlin.reflect)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.jdom2)
+    testImplementation(libs.mockito.kotlin)
 
     // test fakes
     testImplementation(projects.feature.account.fake)

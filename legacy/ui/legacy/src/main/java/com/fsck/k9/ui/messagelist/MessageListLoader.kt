@@ -1,6 +1,7 @@
 package com.fsck.k9.ui.messagelist
 
 import app.k9mail.legacy.mailstore.MessageListRepository
+import com.fsck.k9.contacts.ContactLetterBitmapCreator
 import com.fsck.k9.helper.MessageHelper
 import com.fsck.k9.mailstore.LocalStoreProvider
 import com.fsck.k9.mailstore.MessageColumns
@@ -8,13 +9,16 @@ import com.fsck.k9.search.getLegacyAccounts
 import net.thunderbird.core.android.account.LegacyAccount
 import net.thunderbird.core.android.account.LegacyAccountManager
 import net.thunderbird.core.android.account.SortType
+import net.thunderbird.core.featureflag.FeatureFlagProvider
 import net.thunderbird.core.logging.legacy.Log
 import net.thunderbird.core.preference.display.visualSettings.message.list.MessageListPreferencesManager
 import net.thunderbird.feature.mail.folder.api.OutboxFolderManager
+import net.thunderbird.feature.mail.message.list.MessageListFeatureFlags
 import net.thunderbird.feature.search.legacy.LocalMessageSearch
 import net.thunderbird.feature.search.legacy.api.MessageSearchField
 import net.thunderbird.feature.search.legacy.sql.SqlWhereClause
 
+@Suppress("LongParameterList")
 class MessageListLoader(
     private val accountManager: LegacyAccountManager,
     private val localStoreProvider: LocalStoreProvider,
@@ -22,6 +26,8 @@ class MessageListLoader(
     private val messageHelper: MessageHelper,
     private val messageListPreferencesManager: MessageListPreferencesManager,
     private val outboxFolderManager: OutboxFolderManager,
+    private val featureFlagProvider: FeatureFlagProvider,
+    private val contactLetterBitmapCreator: ContactLetterBitmapCreator,
 ) {
 
     fun getMessageList(config: MessageListConfig): MessageListInfo {
@@ -52,7 +58,16 @@ class MessageListLoader(
         val accountUuid = account.uuid
         val threadId = getThreadId(config.search)
         val sortOrder = buildSortOrder(config)
-        val mapper = MessageListItemMapper(messageHelper, account, messageListPreferencesManager, outboxFolderManager)
+        val mapper = MessageListItemMapper(
+            messageHelper,
+            account,
+            messageListPreferencesManager,
+            outboxFolderManager,
+            contactLetterBitmapCreator = contactLetterBitmapCreator.takeIf {
+                featureFlagProvider.provide(MessageListFeatureFlags.UseComposeForMessageListItems).isEnabled() ||
+                    featureFlagProvider.provide(MessageListFeatureFlags.EnableMessageListNewState).isEnabled()
+            },
+        )
 
         return when {
             threadId != null -> {

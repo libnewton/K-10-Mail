@@ -33,6 +33,8 @@ dependencies {
     testImplementation(projects.core.ui.compose.testing)
     testImplementation(projects.core.testing)
 
+    testImplementation(libs.mockito.kotlin)
+
     // Fakes
     debugImplementation(projects.feature.account.fake)
     testImplementation(projects.feature.account.fake)

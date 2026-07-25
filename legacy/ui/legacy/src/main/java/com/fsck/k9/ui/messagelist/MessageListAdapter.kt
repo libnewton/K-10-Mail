@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import app.k9mail.core.android.common.contact.ContactRepository
 import app.k9mail.legacy.message.controller.MessageReference
 import com.fsck.k9.contacts.ContactPictureLoader
-import com.fsck.k9.ui.helper.RelativeDateTimeFormatter
 import com.fsck.k9.ui.messagelist.item.BannerInlineListInAppNotificationViewHolder
 import com.fsck.k9.ui.messagelist.item.ComposableMessageViewHolder
 import com.fsck.k9.ui.messagelist.item.FooterViewHolder
@@ -44,12 +43,12 @@ class MessageListAdapter internal constructor(
     private val layoutInflater: LayoutInflater,
     private val contactsPictureLoader: ContactPictureLoader,
     private val listItemListener: MessageListItemActionListener,
-    private val appearance: MessageListAppearance,
-    private val relativeDateTimeFormatter: RelativeDateTimeFormatter,
+    private val appearance: () -> MessageListAppearance,
     private val themeProvider: FeatureThemeProvider,
     private val featureFlagProvider: FeatureFlagProvider,
     private val contactRepository: ContactRepository,
     private val avatarMonogramCreator: AvatarMonogramCreator,
+    private val formatDate: (Long) -> String,
 ) : RecyclerView.Adapter<MessageListViewHolder>() {
 
     val colors: MessageViewHolderColors = MessageViewHolderColors.resolveColors(theme)
@@ -172,6 +171,10 @@ class MessageListAdapter internal constructor(
         return viewItems[position].viewType
     }
 
+    fun refreshFormattedDates() {
+        notifyItemRangeChanged(0, itemCount)
+    }
+
     private fun getItem(position: Int): MessageListItem = (viewItems[position] as MessageListViewItem.Message).item
 
     fun getItemById(uniqueId: Long): MessageListItem? {
@@ -237,7 +240,6 @@ class MessageListAdapter internal constructor(
             appearance = appearance,
             res = res,
             contactsPictureLoader = contactsPictureLoader,
-            relativeDateTimeFormatter = relativeDateTimeFormatter,
             colors = colors,
             theme = theme,
             onClickListener = messageClickedListener,
@@ -266,18 +268,19 @@ class MessageListAdapter internal constructor(
 
             TYPE_MESSAGE -> {
                 val messageListItem = getItem(position)
+                val formattedMessageListItem = messageListItem.withFormattedDate()
                 val result = featureFlagProvider.provide(UseComposeForMessageListItems)
                 if (result.isEnabled()) {
                     val messageViewHolder = holder as ComposableMessageViewHolder
                     messageViewHolder.bind(
-                        item = messageListItem,
+                        item = formattedMessageListItem,
                         isActive = isActiveMessage(messageListItem),
                         isSelected = isSelected(messageListItem),
                     )
                 } else {
                     val messageViewHolder = holder as MessageViewHolder
                     messageViewHolder.bind(
-                        messageListItem = messageListItem,
+                        messageListItem = formattedMessageListItem,
                         isActive = isActiveMessage(messageListItem),
                         isSelected = isSelected(messageListItem),
                     )
@@ -302,6 +305,10 @@ class MessageListAdapter internal constructor(
         return item.account.uuid == activeMessage.accountUuid &&
             item.folderId == activeMessage.folderId &&
             item.messageUid == activeMessage.uid
+    }
+
+    private fun MessageListItem.withFormattedDate(): MessageListItem {
+        return copy(displayMessageDateTime = formatDate(messageDate))
     }
 
     fun isSelected(item: MessageListItem): Boolean {
@@ -350,7 +357,7 @@ class MessageListAdapter internal constructor(
     private fun calculateSelectionCount(): Int {
         return when {
             selected.isEmpty() -> 0
-            !appearance.showingThreadedList -> selected.size
+            !appearance().showingThreadedList -> selected.size
             else ->
                 viewItems
                     .asSequence()

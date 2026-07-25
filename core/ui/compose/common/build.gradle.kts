@@ -14,13 +14,17 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.window)
+    api(projects.core.ui.contract)
     implementation(projects.core.logging.api)
 
     implementation(projects.core.common)
     implementation(projects.core.logging.api)
+
+    implementation(libs.androidx.window)
+
     testImplementation(projects.core.logging.testing)
     testImplementation(projects.core.ui.compose.testing)
+    testImplementation(projects.core.ui.compose.common)
     testImplementation(projects.core.ui.compose.designsystem)
     testImplementation(projects.core.android.testing)
     testImplementation(projects.core.logging.testing)

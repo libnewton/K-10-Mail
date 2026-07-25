@@ -17,6 +17,7 @@ import kotlinx.coroutines.sync.withLock
 import net.thunderbird.core.logging.Logger
 import net.thunderbird.core.preference.PreferenceChangeBroker
 import net.thunderbird.core.preference.PreferenceChangeSubscriber
+import net.thunderbird.core.preference.PreferenceScope
 import net.thunderbird.core.preference.display.visualSettings.message.list.MessageListPreferencesManager
 import net.thunderbird.core.preference.storage.Storage
 import net.thunderbird.core.preference.storage.StorageEditor
@@ -25,21 +26,21 @@ import net.thunderbird.core.preference.storage.getEnumOrDefault
 import net.thunderbird.core.preference.storage.putEnum
 
 private const val TAG = "DefaultDisplayVisualSettingsPreferenceManager"
-const val KEY_LEGACY_ACCOUNT_MENU_ENABLED = "legacy_account_menu"
 
 class DefaultDisplayVisualSettingsPreferenceManager(
     private val logger: Logger,
     private val storagePersister: StoragePersister,
     private val storageEditor: StorageEditor,
-    preferenceChangeBroker: PreferenceChangeBroker,
     private val messageListPreferences: MessageListPreferencesManager,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    preferenceChangeBroker: PreferenceChangeBroker,
 ) : DisplayVisualSettingsPreferenceManager, PreferenceChangeSubscriber {
 
     init {
         preferenceChangeBroker.subscribe(this)
     }
+
     private val internalConfigState = MutableStateFlow(value = loadConfig())
     private val configState: StateFlow<DisplayVisualSettings> = combine(
         internalConfigState,
@@ -59,46 +60,91 @@ class DefaultDisplayVisualSettingsPreferenceManager(
 
     private fun loadConfig(): DisplayVisualSettings = DisplayVisualSettings(
         isUseMessageViewFixedWidthFont = storage.getBoolean(
-            KEY_MESSAGE_VIEW_FIXED_WIDTH_FONT,
+            DisplayVisualSettingKey.MessageViewFixedWidthFont.value,
             DISPLAY_SETTINGS_DEFAULT_IS_USE_MESSAGE_VIEW_FIXED_WIDTH_FONT,
         ),
         isAutoFitWidth = storage.getBoolean(
-            KEY_AUTO_FIT_WIDTH,
+            DisplayVisualSettingKey.AutoFitWidth.value,
             DISPLAY_SETTINGS_DEFAULT_IS_AUTO_FIT_WIDTH,
         ),
-        isShowAnimations = storage.getBoolean(
-            KEY_ANIMATION,
-            DISPLAY_SETTINGS_DEFAULT_IS_SHOW_ANIMATION,
+        animationPreference = storage.getEnumOrDefault(
+            DisplayVisualSettingKey.Animation.value,
+            DISPLAY_SETTINGS_DEFAULT_ANIMATION_PREFERENCE,
         ),
         bodyContentType = storage.getEnumOrDefault(
-            KEY_MESSAGE_VIEW_BODY_CONTENT_TYPE,
+            DisplayVisualSettingKey.MessageViewBodyContentType.value,
             DISPLAY_SETTINGS_DEFAULT_BODY_CONTENT_TYPE,
         ),
         drawerExpandAllFolder = storage.getBoolean(
-            KEY_DRAWER_EXPAND_ALL_FOLDER,
+            DisplayVisualSettingKey.DrawerExpandAllFolder.value,
             DISPLAY_SETTINGS_DEFAULT_DRAWER_EXPAND_ALL_FOLDER,
         ),
+        isMessageViewArchiveActionVisible = storage.getBoolean(
+            DisplayVisualSettingKey.MessageViewArchiveActionVisible.value,
+            DISPLAY_SETTINGS_DEFAULT_MESSAGE_VIEW_ARCHIVE_ACTION_VISIBLE,
+        ),
+        isMessageViewDeleteActionVisible = storage.getBoolean(
+            DisplayVisualSettingKey.MessageViewDeleteActionVisible.value,
+            DISPLAY_SETTINGS_DEFAULT_MESSAGE_VIEW_DELETE_ACTION_VISIBLE,
+        ),
+        isMessageViewMoveActionVisible = storage.getBoolean(
+            DisplayVisualSettingKey.MessageViewMoveActionVisible.value,
+            DISPLAY_SETTINGS_DEFAULT_MESSAGE_VIEW_MOVE_ACTION_VISIBLE,
+        ),
+        isMessageViewCopyActionVisible = storage.getBoolean(
+            DisplayVisualSettingKey.MessageViewCopyActionVisible.value,
+            DISPLAY_SETTINGS_DEFAULT_MESSAGE_VIEW_COPY_ACTION_VISIBLE,
+        ),
+        isMessageViewSpamActionVisible = storage.getBoolean(
+            DisplayVisualSettingKey.MessageViewSpamActionVisible.value,
+            DISPLAY_SETTINGS_DEFAULT_MESSAGE_VIEW_SPAM_ACTION_VISIBLE,
+        ),
         isLegacyAccountMenuEnabled = storage.getBoolean(
-            KEY_LEGACY_ACCOUNT_MENU_ENABLED,
+            DisplayVisualSettingKey.LegacyAccountMenuEnabled.value,
             DISPLAY_SETTINGS_DEFAULT_LEGACY_ACCOUNT_MENU_ENABLED,
         ),
-
     )
 
     private fun writeConfig(config: DisplayVisualSettings) {
         logger.debug(TAG) { "writeConfig() called with: config = $config" }
         scope.launch(ioDispatcher) {
             mutex.withLock {
-                storageEditor.putBoolean(KEY_ANIMATION, config.isShowAnimations)
+                storageEditor.putEnum(DisplayVisualSettingKey.Animation.value, config.animationPreference)
                 storageEditor.putBoolean(
-                    KEY_MESSAGE_VIEW_FIXED_WIDTH_FONT,
+                    DisplayVisualSettingKey.MessageViewFixedWidthFont.value,
                     config.isUseMessageViewFixedWidthFont,
                 )
-                storageEditor.putBoolean(KEY_AUTO_FIT_WIDTH, config.isAutoFitWidth)
-                storageEditor.putEnum(KEY_MESSAGE_VIEW_BODY_CONTENT_TYPE, config.bodyContentType)
-                storageEditor.putBoolean(KEY_DRAWER_EXPAND_ALL_FOLDER, config.drawerExpandAllFolder)
-                storageEditor.putBoolean(KEY_LEGACY_ACCOUNT_MENU_ENABLED, config.isLegacyAccountMenuEnabled)
+                storageEditor.putBoolean(DisplayVisualSettingKey.AutoFitWidth.value, config.isAutoFitWidth)
+                storageEditor.putEnum(DisplayVisualSettingKey.MessageViewBodyContentType.value, config.bodyContentType)
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.DrawerExpandAllFolder.value,
+                    config.drawerExpandAllFolder,
+                )
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.LegacyAccountMenuEnabled.value,
+                    config.isLegacyAccountMenuEnabled,
+                )
                 messageListPreferences.save(config.messageListSettings)
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.MessageViewArchiveActionVisible.value,
+                    config.isMessageViewArchiveActionVisible,
+                )
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.MessageViewDeleteActionVisible.value,
+                    config.isMessageViewDeleteActionVisible,
+                )
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.MessageViewMoveActionVisible.value,
+                    config.isMessageViewMoveActionVisible,
+                )
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.MessageViewCopyActionVisible.value,
+                    config.isMessageViewCopyActionVisible,
+                )
+                storageEditor.putBoolean(
+                    DisplayVisualSettingKey.MessageViewSpamActionVisible.value,
+                    config.isMessageViewSpamActionVisible,
+                )
                 storageEditor.commit().also { commited ->
                     logger.verbose(TAG) { "writeConfig: storageEditor.commit() resulted in: $commited" }
                 }
@@ -110,7 +156,9 @@ class DefaultDisplayVisualSettingsPreferenceManager(
 
     override fun getConfigFlow(): Flow<DisplayVisualSettings> = configState
 
-    override fun receive() {
-        internalConfigState.update { loadConfig() }
+    override fun receive(scope: PreferenceScope) {
+        if (scope == PreferenceScope.ALL || scope == PreferenceScope.DISPLAY_VISUAL) {
+            internalConfigState.update { loadConfig() }
+        }
     }
 }

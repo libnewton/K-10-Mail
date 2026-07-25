@@ -112,6 +112,7 @@ val coreNotificationModule = module {
             actionCreator = get(),
             resourceProvider = get(),
             lockScreenNotificationCreator = get(),
+            notificationPreferenceManager = get(),
             application = androidApplication(),
         )
     }
@@ -141,6 +142,7 @@ val coreNotificationModule = module {
             localStoreProvider = get(),
             messageStoreManager = get(),
             notificationContentCreator = get(),
+            generalSettingsManager = get(),
         )
     }
     factory { NotificationLightDecoder() }

@@ -104,10 +104,13 @@ internal class DrawerViewModel(
     override fun event(event: DrawerContract.Event) {
         when (event) {
             is DrawerContract.Event.SelectAccount -> selectAccount(event.accountId)
+
             is DrawerContract.Event.SelectFolder -> selectFolder(event.folderId)
 
             is DrawerContract.Event.OnAccountClick -> openAccount(event.account)
+
             is DrawerContract.Event.OnFolderClick -> openFolder(event.folder)
+
             is DrawerContract.Event.OnAccountViewClick -> {
                 openAccount(
                     state.value.accounts.nextOrFirst(event.account),
@@ -121,8 +124,11 @@ internal class DrawerViewModel(
             }
 
             DrawerContract.Event.OnManageFoldersClick -> emitEffect(DrawerContract.Effect.OpenManageFolders)
+
             DrawerContract.Event.OnSettingsClick -> emitEffect(DrawerContract.Effect.OpenSettings)
+
             DrawerContract.Event.OnSyncAccount -> onSyncAccount()
+
             DrawerContract.Event.OnSyncAllAccounts -> onSyncAllAccounts()
         }
     }

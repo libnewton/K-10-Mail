@@ -1,6 +1,7 @@
 package net.thunderbird.feature.navigation.drawer.dropdown.ui.account
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -31,7 +32,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextBodyLarge
 import app.k9mail.core.ui.compose.designsystem.atom.text.TextBodyMedium
-import app.k9mail.core.ui.compose.theme2.MainTheme
+import net.thunderbird.core.ui.compose.theme2.MainTheme
 import net.thunderbird.feature.navigation.drawer.dropdown.R
 import net.thunderbird.feature.navigation.drawer.dropdown.domain.entity.DisplayAccount
 import net.thunderbird.feature.navigation.drawer.dropdown.domain.entity.MailDisplayAccount
@@ -44,6 +45,7 @@ internal fun AccountView(
     onClick: () -> Unit,
     onAvatarClick: () -> Unit,
     showAccountSelection: Boolean,
+    isShowAnimations: Boolean,
     modifier: Modifier = Modifier,
 ) {
     AccountLayout(
@@ -56,11 +58,13 @@ internal fun AccountView(
             AccountSelectedView(
                 account = account,
                 onAvatarClick = onAvatarClick,
+                isShowAnimations = isShowAnimations,
             )
         }
 
         AnimatedExpandIcon(
             isExpanded = showAccountSelection,
+            isShowAnimations = isShowAnimations,
             modifier = Modifier.padding(end = MainTheme.spacings.double),
             tint = MainTheme.colors.onSurfaceVariant,
         )
@@ -71,12 +75,18 @@ internal fun AccountView(
 private fun RowScope.AccountSelectedView(
     account: DisplayAccount,
     onAvatarClick: () -> Unit,
+    isShowAnimations: Boolean,
 ) {
     AnimatedContent(
         targetState = account,
         transitionSpec = {
-            (slideInHorizontally { it } + fadeIn()) togetherWith
-                (slideOutHorizontally { -it } + fadeOut())
+            if (isShowAnimations) {
+                (slideInHorizontally { it } + fadeIn()) togetherWith
+                    (slideOutHorizontally { -it } + fadeOut())
+            } else {
+                (slideInHorizontally(animationSpec = snap()) { 0 } + fadeIn(animationSpec = snap())) togetherWith
+                    (slideOutHorizontally(animationSpec = snap()) { 0 } + fadeOut(animationSpec = snap()))
+            }
         },
         label = "AccountSelectedContent",
         contentKey = { it.id },
